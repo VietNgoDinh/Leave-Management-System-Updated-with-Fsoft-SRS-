@@ -9,7 +9,7 @@
     {
       "run_id": "RUN-001",
       "workflow_type": "MODE_B",
-      "status": "NOT_STARTED",
+      "status": "WAITING_FOR_HUMAN",
       "current_phase": "ELICITATION",
       "current_step": "ELICITATION",
       "scope": {
@@ -17,14 +17,14 @@
         "use_cases": []
       },
       "last_completed_step": "BOOTSTRAP",
-      "next_step": "add stakeholder material to ba-ai/input-management/user-requirements/, then /ba-next",
+      "next_step": "stakeholder input: answer Q-005, Q-031, Q-032 — add meeting notes to ba-ai/input-management/meeting-minutes/, then /ba-next",
       "blocked_reason": null,
       "manual_block": false,
       "origin_cr": null,
       "created_at": "2026-09-30T00:00:00Z",
-      "updated_at": "2026-10-02T08:29:03Z"
+      "updated_at": "2026-10-02T09:13:38Z"
     }
   ],
   "coding_authorization": null,
-  "updated_at": "2026-10-02T08:29:03Z"
+  "updated_at": "2026-10-02T09:13:38Z"
 }

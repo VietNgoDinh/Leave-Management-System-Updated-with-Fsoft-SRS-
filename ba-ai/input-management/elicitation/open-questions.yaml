@@ -1,0 +1,583 @@
+meta:
+  artifact_type: catalog
+  catalog: open-questions
+  title: Open Questions
+  status: DRAFT
+  baseline: TO_BE
+  origin: AI
+items:
+  - id: Q-001
+    question: 'Where do the people and organisation data come from: employees (including gender and service
+      start date for seniority), the organisational structure (country, city, office, unit, department),
+      each employee''s Line Manager and each project''s members and Project Manager? Options: (a) maintained
+      in this system by Admin/HR; (b) imported or synchronised from existing HR / project systems (which
+      ones?); (c) a mix (say which data comes from where).'
+    reason: The URS needs these data for routing (§4.2), eligibility and entitlements (§4.4, §4.5) and
+      access and reporting scope (§4.8), but names only the card scanner system as an integration and
+      gives no source for them.
+    impact_if_unanswered: The system boundary, the integrations, the Admin/HR functions and the data model
+      of employees and organisation cannot be defined; the overview would have to guess the scope.
+    target_stakeholder: BUSINESS
+    priority: HIGH
+    status: ANSWERED
+    blocking: true
+    related:
+      - REQ-006
+      - REQ-008
+      - REQ-017
+      - REQ-023
+      - REQ-027
+    baseline: TO_BE
+    answer_source: meeting-minutes/MoM 01 Oct 2026.docx
+    answer: '"They are imported from existing HR systems." (option b). The minutes do not name the HR
+      systems, the interface or the import frequency: follow-up question Q-030.'
+  - id: Q-002
+    question: 'Who confirms a leave request when the employee belongs to several projects (several Project
+      Managers) or to no project? Options: (a) every Project Manager of the projects the leave dates affect;
+      (b) any one of them; (c) a designated primary Project Manager; (d) with no project, the request
+      goes straight to the Line Manager.'
+    reason: §4.2 assumes one Project Manager per employee; the URS does not say how confirmation is routed
+      otherwise.
+    impact_if_unanswered: The core confirmation path and the employee-project relationship in the data
+      model would be guessed.
+    target_stakeholder: BUSINESS
+    priority: HIGH
+    status: ANSWERED
+    blocking: true
+    related:
+      - REQ-006
+      - REQ-007
+      - REQ-020
+    baseline: TO_BE
+    answer_source: meeting-minutes/MoM 01 Oct 2026.docx
+    answer: '"The employee can choose the PM from their assigned projects." This settles the several-projects
+      case: the employee chooses which Project Manager confirms (ASM-014). The minutes do not answer the
+      no-project case: follow-up question Q-031.'
+  - id: Q-003
+    question: 'What happens to a leave request that is not confirmed or not approved by the end of the
+      calendar month of its leave start date? Options: (a) it stays pending and can still be acted on;
+      (b) it expires or is cancelled automatically; (c) it is rejected automatically; (d) it is approved
+      automatically; (e) it is escalated (to whom?). And how does the rule apply to leave that spans two
+      months, or to a past-date request submitted on the last day of the month?'
+    reason: §4.2 and §6 require review and approval within the calendar month of the leave start date
+      but do not say what the system does when the deadline passes.
+    impact_if_unanswered: The request lifecycle (statuses and transitions) and any month-end scheduled
+      job cannot be specified.
+    target_stakeholder: BUSINESS
+    priority: HIGH
+    status: ANSWERED
+    blocking: true
+    related:
+      - REQ-009
+      - REQ-006
+      - REQ-008
+      - REQ-001
+    baseline: TO_BE
+    answer_source: meeting-minutes/MoM 01 Oct 2026.docx
+    answer: 'Outcome at the deadline: "It''s cancelled" (option b). Leave spanning two months and past-date
+      requests on the last day of the month: "As long as the leave duration requested is not from the
+      previous month of current month, it is valid." The minutes do not say who cancels (ASM-012) or when
+      exactly the cut-off is (Q-034), nor how a period that straddles the previous and the current month
+      is handled (ASM-013).'
+  - id: Q-004
+    question: 'How is a policy-violating leave request reviewed? (1) Who performs the "manual review":
+      the normal Project Manager then Line Manager steps with the violation highlighted, or an additional
+      review (e.g. by HR)? (2) Which violations are allowed through (e.g. exceeding the remaining entitlement,
+      a leave type the employee is not eligible for, a missing required document)? (3) If approved, what
+      happens to the excess (negative balance, converted to unpaid leave, other)?'
+    reason: §3 and §4.1 allow submission despite a policy violation "subject to review" without saying
+      who reviews, which violations qualify or how an approved violation is accounted for.
+    impact_if_unanswered: The review workflow could gain an extra actor and step, and the entitlement
+      accounting rules would be guessed.
+    target_stakeholder: BUSINESS
+    priority: HIGH
+    status: ANSWERED
+    blocking: true
+    related:
+      - REQ-002
+      - REQ-003
+      - REQ-004
+    baseline: TO_BE
+    answer_source: meeting-minutes/MoM 01 Oct 2026.docx
+    answer: '(1) "Who reviews: the line manager." (2) "Leave exceed entitlement is allowed." (3) "If approved,
+      what happens to the excess: The balance stay at 0." Not answered: whether the Project Manager still
+      confirms first (ASM-011), whether other violations (ineligible leave type, missing document) are
+      allowed (Q-032), and whether the excess days are recorded anywhere (Q-033).'
+  - id: Q-005
+    question: Are leave types, eligibility rules and seniority-based entitlements the same for the whole
+      company, or defined per country (or per office or legal entity), since government regulations differ
+      between the countries the company operates in?
+    reason: §4.5 bases Paid Leave on government regulations, and §4.8 states the company operates in several
+      countries, but the URS describes a single set of leave types.
+    impact_if_unanswered: The data model of leave types and entitlements (global or country-scoped) and
+      the Admin/HR configuration functions would be guessed.
+    target_stakeholder: COMPLIANCE
+    priority: HIGH
+    status: OPEN
+    blocking: true
+    related:
+      - REQ-016
+      - REQ-017
+      - REQ-014
+      - REQ-019
+      - REQ-023
+    baseline: TO_BE
+  - id: Q-006
+    question: 'In which unit is leave requested and counted? Options: (a) full days only; (b) full and
+      half days (morning / afternoon); (c) hours.'
+    reason: The URS does not state the unit; the 4-hour presence threshold in §4.3 suggests partial days
+      may matter.
+    impact_if_unanswered: The leave request and entitlement data model and the off-work-day matching would
+      be guessed.
+    target_stakeholder: BUSINESS
+    priority: HIGH
+    status: ANSWERED
+    blocking: true
+    related:
+      - REQ-001
+      - REQ-014
+      - REQ-011
+    baseline: TO_BE
+    answer_source: meeting-minutes/MoM 01 Oct 2026.docx
+    answer: '"full and half days (morning / afternoon)" (option b). How a half day counts against the
+      entitlement: ASM-015.'
+  - id: Q-007
+    question: 'What does the annual refresh do, and is it the same as the year-start entitlement import?
+      In particular: are unused days carried over (up to what limit, until when) or forfeited, and is
+      the refresh triggered by Admin/HR or run automatically on a fixed date?'
+    reason: §4.1 says leave data is refreshed annually and §4.6 that Admin/HR manages it, while §4.4 describes
+      a separate import at the beginning of the year.
+    impact_if_unanswered: The year-end process could be specified as one function or two, and carry-over
+      rules would be missing.
+    target_stakeholder: BUSINESS
+    priority: HIGH
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-014
+      - REQ-015
+    baseline: TO_BE
+  - id: Q-008
+    question: Can an employee cancel or withdraw a leave request, or change one that is still pending?
+      If so, until when (before confirmation, before approval, after approval but before the leave starts),
+      and does a change to an approved request go through review again?
+    reason: The URS mentions modification only after denial or rejection (§4.2).
+    impact_if_unanswered: Cancellation and edit functions would be left out of scope; adding them later
+      re-opens the approved overview.
+    target_stakeholder: BUSINESS
+    priority: HIGH
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-001
+      - REQ-010
+      - REQ-005
+    baseline: TO_BE
+  - id: Q-009
+    question: 'When is the employee''s remaining entitlement reduced: on submission (reserved), on confirmation,
+      or on final approval? Is it restored when a request is denied, rejected or cancelled?'
+    reason: The URS describes entitlements (§4.4) and the workflow (§4.2) but not how they interact.
+    impact_if_unanswered: Balance checks during validation and the balance shown to employees and reviewers
+      would be guessed.
+    target_stakeholder: BUSINESS
+    priority: HIGH
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-002
+      - REQ-014
+    baseline: TO_BE
+  - id: Q-010
+    question: Who approves the leave of a Line Manager, and who confirms and approves when the employee's
+      Project Manager and Line Manager are the same person?
+    reason: §4.2 covers only the Project Manager's own requests (auto-confirmed).
+    impact_if_unanswered: The routing of these requests would be guessed.
+    target_stakeholder: BUSINESS
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-006
+      - REQ-007
+      - REQ-008
+    baseline: TO_BE
+  - id: Q-011
+    question: Can a Project Manager or Line Manager delegate confirmation or approval to someone else
+      while they are absent? If so, who can be a delegate and for how long?
+    reason: The URS does not mention delegation, yet reviews must be completed within the month (§6),
+      which an absent reviewer could prevent.
+    impact_if_unanswered: Requests may miss the month deadline while a reviewer is away; no delegation
+      function is specified.
+    target_stakeholder: BUSINESS
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-006
+      - REQ-008
+      - REQ-009
+    baseline: TO_BE
+  - id: Q-012
+    question: Can anyone submit a leave request on behalf of an employee (e.g. a Project Manager for a
+      team member, or HR)? The URS says "Project Managers submitting for themselves", which may imply
+      they can also submit for others.
+    reason: §4.2 wording is ambiguous; §4.6 gives submission only to the Employee role.
+    impact_if_unanswered: An on-behalf submission function and its permission would be left out.
+    target_stakeholder: BUSINESS
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-001
+      - REQ-007
+    baseline: TO_BE
+  - id: Q-013
+    question: 'How are leave days counted: are weekends and public holidays excluded, which days are working
+      days in each country or office, and who maintains the public holiday calendars?'
+    reason: The URS does not define working days; with offices in several countries (§4.8), calendars
+      differ, and the weekly off-work check (§4.3) must skip non-working days.
+    impact_if_unanswered: Leave duration and off-work-day detection would use guessed calendars.
+    target_stakeholder: BUSINESS
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-001
+      - REQ-011
+      - REQ-023
+    baseline: TO_BE
+  - id: Q-014
+    question: 'For the Friday attendance notification: (1) which period does it cover (the past week,
+      the month to date, other)? (2) Does a "valid leave request" mean an approved one only, or also one
+      still pending? (3) Who receives it: the employee only, or also the Project Manager / Line Manager
+      / HR? (4) At what time is it sent, in each office''s local time zone?'
+    reason: §4.3 states the day and the two lists but not the period, the validity rule, the recipients
+      or the time.
+    impact_if_unanswered: The scheduled notification job and its email template would be specified on
+      guesses.
+    target_stakeholder: BUSINESS
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-011
+      - REQ-012
+    baseline: TO_BE
+  - id: Q-015
+    question: How should the off-work check treat employees who do not use a card scanner on a given day,
+      e.g. remote work, business trips, client-site work, part-time schedules, or offices without scanners?
+    reason: §4.3 treats a missing check-in as an off-work day, which would flag such employees as absent
+      without leave.
+    impact_if_unanswered: Employees could receive incorrect absence notifications.
+    target_stakeholder: OPERATIONS
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-011
+      - REQ-012
+    baseline: TO_BE
+  - id: Q-016
+    question: 'How does the card scanner system provide its data: interface (API, database view, file
+      export), frequency (real time, daily), content (every swipe, or first check-in and last check-out
+      per day), employee identifier, and is it one system for all countries and offices?'
+    reason: §4.8 says to integrate with the card scanner system but describes no interface.
+    impact_if_unanswered: The integration and the presence-time calculation cannot be designed.
+    target_stakeholder: INTEGRATION
+    priority: HIGH
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-024
+      - REQ-011
+      - REQ-032
+    baseline: TO_BE
+  - id: Q-017
+    question: 'For the year-start entitlement import: what file format and columns are expected, what
+      happens to rows with errors, can it be repeated during the year (e.g. for new joiners), and can
+      Admin/HR also adjust an individual employee''s entitlement manually?'
+    reason: §4.4 says HR/Admin can import entitlements and §4.6 that they manage entitlement data, without
+      details.
+    impact_if_unanswered: The import function and any entitlement maintenance function would be specified
+      on guesses.
+    target_stakeholder: DATA
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-014
+    baseline: TO_BE
+  - id: Q-018
+    question: 'Is the list of suggested leave types in §4.7 the set required at go-live? For each type,
+      please give: paid or unpaid, entitlement (fixed days, seniority bands, or none), eligibility (gender,
+      other) and required documents.'
+    reason: §4.7 calls the list "suggested" and gives rules only for Paid, Maternity and Sick Leave.
+    impact_if_unanswered: The initial leave type configuration and its validation rules would be incomplete.
+    target_stakeholder: BUSINESS
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-019
+      - REQ-016
+      - REQ-017
+      - REQ-018
+    baseline: TO_BE
+  - id: Q-019
+    question: 'How is the organisation organised below country, city and office: what are a "unit" and
+      a "department", and how do they relate to each other and to offices?'
+    reason: §4.7 reports by unit and department and §4.8 by country, city and office, without describing
+      the hierarchy.
+    impact_if_unanswered: The organisational structure and reporting dimensions would be modelled on a
+      guess.
+    target_stakeholder: DATA
+    priority: HIGH
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-022
+      - REQ-023
+      - REQ-027
+    baseline: TO_BE
+  - id: Q-020
+    question: 'Which leave statistics must the reports show (e.g. days taken by leave type, remaining
+      entitlements, absences without leave), for which periods, with what export (Excel, PDF, none)? Which
+      scope does each role see: Line Managers their own unit or department, HR their country or the whole
+      company? Do Project Managers have reports?'
+    reason: §4.7 asks for leave statistics by unit, department or company and §4.8 by country, city or
+      office, without contents or scopes.
+    impact_if_unanswered: The reporting functions and their permissions would be guessed.
+    target_stakeholder: BUSINESS
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-022
+      - REQ-027
+    baseline: TO_BE
+  - id: Q-021
+    question: Which events send notification emails (e.g. request submitted, confirmed, denied, approved,
+      rejected, reminder before the month-end deadline), to whom, and what must be configurable (templates,
+      recipients, schedule, on/off per event)? Who configures them?
+    reason: §5 requires automated, configurable notification emails but names only the weekly attendance
+      notification (§4.3).
+    impact_if_unanswered: The email templates and the email configuration function would be guessed.
+    target_stakeholder: BUSINESS
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-013
+      - REQ-012
+    baseline: TO_BE
+  - id: Q-022
+    question: 'How do users sign in: through the company''s single sign-on / identity provider (which
+      one?) or with accounts managed by this system? What session lifetime (idle timeout) and password
+      rules apply?'
+    reason: §5 requires secure login and logout for all roles but gives no authentication mode or session
+      rules.
+    impact_if_unanswered: The security NFR has no measurable criteria and a possible identity-provider
+      integration is unknown.
+    target_stakeholder: SECURITY
+    priority: HIGH
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-026
+    baseline: TO_BE
+  - id: Q-023
+    question: 'What are the measurable performance targets: the peak number of concurrent users, and the
+      response time expected for submitting a request and loading dashboards (e.g. 95% of requests within
+      N seconds) at that load?'
+    reason: §4.8 and §5 ask for scale to 33,000 users and concurrent submissions "without delay" without
+      a measurable target.
+    impact_if_unanswered: The performance and scalability NFRs cannot be tested.
+    target_stakeholder: TECHNICAL
+    priority: HIGH
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-028
+      - REQ-029
+    baseline: TO_BE
+  - id: Q-024
+    question: What availability and recovery targets apply (e.g. monthly availability %, support hours
+      across time zones, maximum data loss and recovery time after a failure)?
+    reason: §4.8 asks for reliability under heavy usage without a target.
+    impact_if_unanswered: The reliability NFR cannot be tested and the hosting design has no target.
+    target_stakeholder: OPERATIONS
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-030
+    baseline: TO_BE
+  - id: Q-025
+    question: Which languages are required, and at go-live or later? Should dates, times and time zones
+      follow each office's locale?
+    reason: §6 says the system should be localised (multi-language) "if needed".
+    impact_if_unanswered: The internationalisation NFR has no measurable criteria.
+    target_stakeholder: UX
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-031
+    baseline: TO_BE
+  - id: Q-026
+    question: Which browsers (and versions) and devices must be supported (phones, tablets, desktop)?
+      Is a native mobile app out of scope?
+    reason: §5 says web-based and mobile-responsive without naming browsers or devices.
+    impact_if_unanswered: The platform NFR cannot be tested.
+    target_stakeholder: UX
+    priority: LOW
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-025
+    baseline: TO_BE
+  - id: Q-027
+    question: Uploaded documents such as hospital certificates contain personal health data. Which data-protection
+      rules apply (e.g. GDPR or local laws), who may view the documents, how long are they kept, and which
+      file types and sizes are accepted?
+    reason: §4.5 requires document uploads but the URS has no safety, privacy or retention requirement.
+    impact_if_unanswered: The Safety NFRs and the document-handling rules would be missing.
+    target_stakeholder: COMPLIANCE
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-004
+      - REQ-018
+    baseline: TO_BE
+  - id: Q-028
+    question: The URS gives no MoSCoW priority for most requirements (§4.1 – §4.4 use "can" or no modal
+      verb). Please confirm the priority of each requirement, in particular whether submission, confirmation
+      and approval are must-haves.
+    reason: Priorities were derived from "must" (HIGH) and "should" (MEDIUM); requirements without either
+      are MEDIUM by default.
+    impact_if_unanswered: Backlog planning would rely on default priorities.
+    target_stakeholder: BUSINESS
+    priority: LOW
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-001
+      - REQ-006
+      - REQ-008
+    baseline: TO_BE
+  - id: Q-030
+    question: The minutes (Q-001) say people and organisation data are imported from existing HR systems.
+      Which HR system or systems provide them, through which interface (API, database view, file export)
+      and how often (real time, daily, on demand)? Please also confirm that project assignments and each
+      project's Project Manager come from these HR systems too, and not from a separate project system.
+    reason: The minutes settle that the data are imported, but not from which systems, how or how often.
+      Project assignments often live outside HR systems.
+    impact_if_unanswered: The HR integration (interface, schedule, error handling) and the freshness of
+      reporting lines and project assignments used for routing cannot be specified.
+    target_stakeholder: INTEGRATION
+    priority: HIGH
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-033
+      - REQ-023
+      - REQ-006
+      - REQ-008
+      - Q-001
+    baseline: TO_BE
+  - id: Q-031
+    question: 'Who confirms a leave request when the employee is assigned to no project? Options: (a)
+      the confirmation step is skipped and the request goes straight to the Line Manager; (b) the Line
+      Manager both confirms and approves; (c) another role confirms (which one?); (d) the case cannot
+      occur, because every employee is always assigned to at least one project.'
+    reason: The minutes answer the several-projects part of Q-002 (the employee chooses the PM from their
+      assigned projects) but not the no-project part.
+    impact_if_unanswered: A core path of the review workflow (and whether a request can skip confirmation)
+      would be guessed.
+    target_stakeholder: BUSINESS
+    priority: HIGH
+    status: OPEN
+    blocking: true
+    related:
+      - REQ-001
+      - REQ-006
+      - REQ-008
+      - Q-002
+    baseline: TO_BE
+  - id: Q-032
+    question: 'The minutes say exceeding the remaining entitlement is allowed and is reviewed by the Line
+      Manager. What happens with the other policy violations: (1) a leave type the employee is not eligible
+      for (gender, seniority); (2) a missing required supporting document? For each: (a) also allowed
+      and reviewed by the Line Manager, or (b) blocked at submission?'
+    reason: Q-004 asked which violations are allowed through; the minutes name only exceeding the entitlement.
+    impact_if_unanswered: Which validation rules block submission and which only flag the request for
+      review (a hard policy rule) would be guessed.
+    target_stakeholder: BUSINESS
+    priority: HIGH
+    status: OPEN
+    blocking: true
+    related:
+      - REQ-002
+      - REQ-003
+      - REQ-004
+      - REQ-017
+      - REQ-018
+      - Q-004
+    baseline: TO_BE
+  - id: Q-033
+    question: When a request that exceeds the remaining entitlement is approved, the balance stays at
+      0. Are the excess days recorded anywhere (for example shown as over-entitlement or unpaid days in
+      the reports, or passed on for payroll), or are they simply not counted?
+    reason: The minutes say the balance stays at 0 but not what becomes of the days above the entitlement.
+    impact_if_unanswered: The entitlement accounting and the leave statistics could lose or misreport
+      the excess days.
+    target_stakeholder: BUSINESS
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-003
+      - REQ-022
+      - Q-004
+      - Q-009
+    baseline: TO_BE
+  - id: Q-034
+    question: 'Requests not confirmed and approved by the end of the leave start month are cancelled.
+      When exactly is the cut-off: the end of the last day of the month in each office''s local time zone,
+      or in one company time zone? Is there any grace period, for example for a past-date request submitted
+      on the last day of the month, which would otherwise be cancelled the same day unless both the Project
+      Manager and the Line Manager act on it?'
+    reason: The minutes state the outcome (cancellation) but not the exact cut-off in a company spread
+      over several countries and time zones.
+    impact_if_unanswered: The timing of the month-end cancellation job would be guessed, and late-month
+      requests may be cancelled unexpectedly.
+    target_stakeholder: BUSINESS
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-034
+      - REQ-009
+      - REQ-001
+      - Q-003
+    baseline: TO_BE
+  - id: Q-035
+    question: Leave can be taken in half days (morning / afternoon). How does the weekly attendance check
+      (a day is off work with no check-in or with less than 4 hours of presence) treat a day with a half-day
+      leave? For example, if an employee has a half-day leave and less than 4 hours of presence, is the
+      day reported as off work with a valid leave request, as off work without a leave request, or not
+      reported at all?
+    reason: The URS's 4-hour rule (§4.3) was written without half-day leave, which the minutes now introduce.
+    impact_if_unanswered: The weekly notification could wrongly report half-day leave as absence without
+      leave, or hide real absences.
+    target_stakeholder: BUSINESS
+    priority: MEDIUM
+    status: OPEN
+    blocking: false
+    related:
+      - REQ-011
+      - REQ-012
+      - REQ-001
+      - Q-006
+    baseline: TO_BE

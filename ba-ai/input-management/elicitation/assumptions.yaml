@@ -1,0 +1,155 @@
+meta:
+  artifact_type: catalog
+  catalog: assumptions
+  title: Assumptions
+  status: DRAFT
+  baseline: TO_BE
+  origin: AI
+items:
+  - id: ASM-001
+    statement: '"Manager" in URS §3 and §4.7 ("HR and Managers will have access to reporting screens")
+      means the Line Manager role.'
+    reason: §4.6 defines only Employee, Project Manager, Line Manager and Admin/HR; §4.2 and §4.6 use
+      "Line Manager" for the approving manager.
+    status: OPEN
+    related:
+      - REQ-020
+      - REQ-022
+    baseline: TO_BE
+  - id: ASM-002
+    statement: '"Admin", "HR", "HR/Admin" and "Admin/HR" in the URS name one role, Admin/HR, which manages
+      entitlements, the annual refresh and the leave type rules.'
+    reason: §4.6 defines a single Admin/HR role; §4.4, §4.5 and §4.7 use the other spellings for the same
+      responsibilities.
+    status: OPEN
+    related:
+      - REQ-014
+      - REQ-015
+      - REQ-016
+      - REQ-017
+      - REQ-018
+      - REQ-022
+    baseline: TO_BE
+  - id: ASM-003
+    statement: '"Medical Leave with Hospital Certificate" (URS §4.5) and "Sick Leave (with Hospital Certificate)"
+      (URS §4.7) are the same leave type.'
+    reason: Both are described as a leave type that requires a hospital certificate.
+    status: OPEN
+    related:
+      - REQ-018
+      - REQ-019
+    baseline: TO_BE
+  - id: ASM-004
+    statement: The "request type" filter of the leave request views (URS §4.7) means the leave type.
+    reason: The URS defines no other kind of request than leave requests.
+    status: OPEN
+    related:
+      - REQ-021
+    baseline: TO_BE
+  - id: ASM-005
+    statement: An employee can see their own leave entitlement and remaining balance when submitting and
+      viewing leave requests.
+    reason: URS §3 asks for "policy transparency" and §4.4 for per-employee entitlements, but no section
+      states how employees see them.
+    status: OPEN
+    related:
+      - REQ-002
+      - REQ-005
+    baseline: TO_BE
+  - id: ASM-006
+    statement: For past-date leave requests, "within the current month" (URS §4.1) means the calendar
+      month of the submission date.
+    reason: 'It is the plain reading of §4.1 and matches the calendar-month rule of §6. Confirmed by meeting-minutes/MoM
+      01 Oct 2026.docx (answer to Q-003): "As long as the leave duration requested is not from the previous
+      month of current month, it is valid".'
+    status: CONFIRMED
+    related:
+      - REQ-001
+    baseline: TO_BE
+  - id: ASM-007
+    statement: The weekly attendance notification (URS §4.3) is sent by email.
+    reason: URS §5 speaks of "notification emails"; no other channel is mentioned.
+    status: OPEN
+    related:
+      - REQ-012
+      - REQ-013
+    baseline: TO_BE
+  - id: ASM-008
+    statement: Project Managers and Line Managers are also employees and submit their own leave requests
+      through the same submission function as other employees.
+    reason: URS §4.2 mentions "Project Managers submitting for themselves"; nothing describes a separate
+      function for managers.
+    status: OPEN
+    related:
+      - REQ-001
+      - REQ-007
+    baseline: TO_BE
+  - id: ASM-009
+    statement: The vendor deliverables in URS §7 (technical proposal, prototype, implementation plan,
+      training plan and documentation, support plan) are project deliverables, not system requirements,
+      and are not recorded as REQs.
+    reason: They describe what the vendor hands over, not what the system does.
+    status: OPEN
+    related: []
+    baseline: TO_BE
+  - id: ASM-011
+    statement: 'A policy-violating leave request follows the normal review path: the chosen Project Manager
+      confirms or denies it first, then the Line Manager approves or rejects it. The Line Manager''s approval
+      step is the manual review, and the violation is shown to the Line Manager. No extra review step
+      (e.g. by HR) is added.'
+    reason: 'The minutes (answer to Q-004) say "Who reviews: the line manager" without saying that the
+      Project Manager step is skipped or that another step is added.'
+    status: OPEN
+    related:
+      - REQ-003
+      - REQ-006
+      - REQ-008
+      - Q-004
+    baseline: TO_BE
+  - id: ASM-012
+    statement: The month-end cancellation is done automatically by the system (a scheduled job), without
+      any user action.
+    reason: The minutes (answer to Q-003) say only "It's cancelled" and name no actor; no role in the
+      URS is responsible for it.
+    status: OPEN
+    related:
+      - REQ-034
+      - REQ-009
+      - Q-003
+    baseline: TO_BE
+  - id: ASM-013
+    statement: A leave request whose period includes any day of a month before the submission month is
+      not accepted as a whole, even if it also includes days of the current month; the employee requests
+      only the current-month days. Leave that starts in the current month and continues into the next
+      month is accepted.
+    reason: The minutes (answer to Q-003) say "As long as the leave duration requested is not from the
+      previous month of current month, it is valid", which does not say how a period that straddles the
+      previous and the current month is handled.
+    status: OPEN
+    related:
+      - REQ-001
+      - Q-003
+    baseline: TO_BE
+  - id: ASM-014
+    statement: The employee chooses the confirming Project Manager on each leave request, at submission;
+      only the chosen Project Manager confirms or denies that request. With a single assigned project,
+      that project's Project Manager is the only choice.
+    reason: The minutes (answer to Q-002) say "The employee can choose the PM from their assigned projects"
+      without saying whether the choice is made per request or once.
+    status: OPEN
+    related:
+      - REQ-001
+      - REQ-006
+      - REQ-020
+      - Q-002
+    baseline: TO_BE
+  - id: ASM-015
+    statement: A half-day leave counts as 0.5 day against the employee's leave entitlement.
+    reason: The minutes (answer to Q-006) make leave requestable in full and half days, but do not say
+      how a half day is counted.
+    status: OPEN
+    related:
+      - REQ-001
+      - REQ-014
+      - Q-006
+    baseline: TO_BE

@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "counters": {
+    "TERM": 56,
+    "REQ": 34,
+    "Q": 35,
+    "ASM": 15
+  }
+}

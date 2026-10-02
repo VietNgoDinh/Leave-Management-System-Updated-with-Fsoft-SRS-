@@ -1,0 +1,318 @@
+meta:
+  artifact_type: catalog
+  catalog: glossary
+  title: Glossary
+  status: DRAFT
+  baseline: TO_BE
+  origin: AI
+  review:
+    GATE-02: NOT_REQUESTED
+items:
+  - id: TERM-001
+    term: SRS
+    kind: ABBREVIATION
+    definition: System Requirement Specification
+    baseline: TO_BE
+  - id: TERM-002
+    term: UC
+    kind: ABBREVIATION
+    definition: 'Use case: one function an actor performs in the system (UC-NNN)'
+    baseline: TO_BE
+  - id: TERM-003
+    term: BR
+    kind: ABBREVIATION
+    definition: Business rule. BR-NNN is a policy or common rule shared by use cases; UC-NNN-BR-nn is
+      a step rule of one use case
+    baseline: TO_BE
+  - id: TERM-004
+    term: CBR
+    kind: ABBREVIATION
+    definition: 'Common business rule: a business rule of kind COMMON, applied by reference in several
+      use cases'
+    baseline: TO_BE
+  - id: TERM-005
+    term: CMUC
+    kind: ABBREVIATION
+    definition: 'Common use case: a reusable specification of one standard operation (view list, create,
+      read, update, delete, disable)'
+    baseline: TO_BE
+  - id: TERM-006
+    term: ET
+    kind: ABBREVIATION
+    definition: Email template (ET-NNN)
+    baseline: TO_BE
+  - id: TERM-007
+    term: EMSG
+    kind: ABBREVIATION
+    definition: Error message shown in a dialog
+    baseline: TO_BE
+  - id: TERM-008
+    term: IEM
+    kind: ABBREVIATION
+    definition: In-line error message shown under a field
+    baseline: TO_BE
+  - id: TERM-009
+    term: CFD
+    kind: ABBREVIATION
+    definition: Confirmation dialog message
+    baseline: TO_BE
+  - id: TERM-010
+    term: SCD
+    kind: ABBREVIATION
+    definition: Success dialog message
+    baseline: TO_BE
+  - id: TERM-011
+    term: INF
+    kind: ABBREVIATION
+    definition: Informing or warning message
+    baseline: TO_BE
+  - id: TERM-012
+    term: NFR
+    kind: ABBREVIATION
+    definition: Non-functional requirement
+    baseline: TO_BE
+  - id: TERM-013
+    term: US
+    kind: ABBREVIATION
+    definition: User story (US-NNN)
+    baseline: TO_BE
+  - id: TERM-014
+    term: N/A
+    kind: ABBREVIATION
+    definition: Not applicable or not available
+    baseline: TO_BE
+  - id: TERM-015
+    term: '[Field]'
+    kind: NOTATION
+    definition: A field or attribute, e.g. [Start date]
+    baseline: TO_BE
+  - id: TERM-016
+    term: '{Object}'
+    kind: NOTATION
+    definition: A record of an object, e.g. {Leave Request}
+    baseline: TO_BE
+  - id: TERM-017
+    term: '"Value"'
+    kind: NOTATION
+    definition: A literal value, e.g. "Pending approval"
+    baseline: TO_BE
+  - id: TERM-018
+    term: <Value>
+    kind: NOTATION
+    definition: A special value the system supplies, e.g. <Today>, <Current User>
+    baseline: TO_BE
+  - id: TERM-019
+    term: <<Field>>
+    kind: NOTATION
+    definition: The value of a field filled into an email template, e.g. <<Employee Name>>
+    baseline: TO_BE
+  - id: TERM-020
+    term: (n)
+    kind: NOTATION
+    definition: Step n of an activities flow; step rules are keyed by it
+    baseline: TO_BE
+  - id: TERM-021
+    term: O / O* / O** / X
+    kind: NOTATION
+    definition: 'Permission matrix: allowed / allowed on the items the user owns / allowed within the
+      scope the function states / not allowed'
+    baseline: TO_BE
+  - id: TERM-022
+    term: URS
+    kind: ABBREVIATION
+    definition: 'User Requirement Specification: the client''s requirement document for the Leave Request
+      Management System (v1.0, 2025-05-09)'
+    baseline: TO_BE
+  - id: TERM-023
+    term: HR
+    kind: ABBREVIATION
+    definition: Human Resources
+    baseline: TO_BE
+  - id: TERM-024
+    term: PM
+    kind: ABBREVIATION
+    definition: Project Manager
+    baseline: TO_BE
+  - id: TERM-025
+    term: Leave request
+    kind: TERM
+    definition: An employee's request to be absent for a period, in full or half days, under one leave
+      type. It is submitted by the employee, confirmed or denied by the chosen Project Manager, then approved
+      or rejected by the Line Manager. A request not confirmed and approved by the end of its leave start
+      month is cancelled.
+    baseline: TO_BE
+  - id: TERM-026
+    term: Leave type
+    kind: TERM
+    definition: A category of leave (e.g. Paid Leave, Maternity Leave) with its own eligibility rules
+      (gender, seniority) and documentation requirements, configured by Admin/HR.
+    baseline: TO_BE
+  - id: TERM-027
+    term: Leave entitlement
+    kind: TERM
+    definition: The leave an employee is entitled to, which varies with seniority and gender. HR/Admin
+      imports it for each employee at the beginning of each year.
+    baseline: TO_BE
+  - id: TERM-028
+    term: Seniority
+    kind: TERM
+    definition: An employee's years of service. The entitlement of some leave types, such as Paid Leave,
+      depends on it according to government regulations.
+    baseline: TO_BE
+  - id: TERM-029
+    term: Annual refresh
+    kind: TERM
+    definition: The yearly refresh of leave data, managed by Admin/HR.
+    baseline: TO_BE
+  - id: TERM-030
+    term: Paid Leave
+    kind: TERM
+    definition: A leave type whose entitlement is based on the employee's seniority.
+    baseline: TO_BE
+  - id: TERM-031
+    term: Maternity Leave
+    kind: TERM
+    definition: A leave type available only to female employees.
+    baseline: TO_BE
+  - id: TERM-032
+    term: Sick Leave (with Hospital Certificate)
+    kind: TERM
+    definition: A leave type that requires the employee to upload a hospital certificate with the request.
+      The URS also calls it 'Medical Leave with Hospital Certificate'.
+    baseline: TO_BE
+  - id: TERM-033
+    term: Supporting document
+    kind: TERM
+    definition: A document a leave type requires the employee to upload with a leave request (e.g. a hospital
+      certificate), as defined in the leave type's settings.
+    baseline: TO_BE
+  - id: TERM-034
+    term: Policy violation
+    kind: TERM
+    definition: A leave request that does not satisfy the leave policy. It may still be submitted but
+      is subject to manual review by the Line Manager. Exceeding the remaining leave balance is an allowed
+      violation; if the request is approved, the balance stays at 0.
+    baseline: TO_BE
+  - id: TERM-035
+    term: Confirmation
+    kind: TERM
+    definition: 'Step 1 of the review workflow: the Project Manager the employee chose from their assigned
+      projects confirms or denies the leave request, within the calendar month of the leave start date.'
+    baseline: TO_BE
+  - id: TERM-036
+    term: Auto-confirmation
+    kind: TERM
+    definition: The automatic completion of the confirmation step when a Project Manager submits a leave
+      request for themselves.
+    baseline: TO_BE
+  - id: TERM-037
+    term: Approval
+    kind: TERM
+    definition: 'Step 2 of the review workflow: the Line Manager approves or rejects a confirmed leave
+      request, within the calendar month of the leave start date.'
+    baseline: TO_BE
+  - id: TERM-038
+    term: Deny
+    kind: TERM
+    definition: The Project Manager's negative decision at the confirmation step. The employee may modify
+      and resubmit the request.
+    baseline: TO_BE
+  - id: TERM-039
+    term: Reject
+    kind: TERM
+    definition: The Line Manager's negative decision at the approval step. The employee may modify and
+      resubmit the request.
+    baseline: TO_BE
+  - id: TERM-040
+    term: Resubmit
+    kind: TERM
+    definition: To modify a denied or rejected leave request and submit it again for review.
+    baseline: TO_BE
+  - id: TERM-041
+    term: Employee
+    kind: TERM
+    definition: 'A user role: submits leave requests and views their status.'
+    baseline: TO_BE
+  - id: TERM-042
+    term: Project Manager
+    kind: TERM
+    definition: 'A user role: confirms or denies the leave requests of the members of their project team.
+      Their own leave requests are auto-confirmed.'
+    baseline: TO_BE
+  - id: TERM-043
+    term: Line Manager
+    kind: TERM
+    definition: 'A user role: approves or rejects leave requests confirmed by the Project Manager.'
+    baseline: TO_BE
+  - id: TERM-044
+    term: Admin/HR
+    kind: TERM
+    definition: 'A user role: manages leave entitlement data, the annual refresh and the leave type rules.
+      The URS also writes ''HR/Admin'', ''HR'' and ''Admin''.'
+    baseline: TO_BE
+  - id: TERM-045
+    term: Dashboard
+    kind: TERM
+    definition: A role-specific screen for Project Managers and Line Managers that by default shows only
+      the leave requests requiring their action.
+    baseline: TO_BE
+  - id: TERM-046
+    term: Card scanner system
+    kind: TERM
+    definition: The company's existing time tracking system, in which employees record check-in and check-out
+      with a card. It provides the check-in/check-out times; its processing logic is out of scope.
+    baseline: TO_BE
+  - id: TERM-047
+    term: Check-in / check-out time
+    kind: TERM
+    definition: The times an employee's arrival and departure are recorded by the card scanner system.
+    baseline: TO_BE
+  - id: TERM-048
+    term: Presence time
+    kind: TERM
+    definition: The total time an employee is present on a day, according to the card scanner check-in/check-out
+      times.
+    baseline: TO_BE
+  - id: TERM-049
+    term: Off-work day
+    kind: TERM
+    definition: A day on which an employee has no check-in time recorded, or a total presence of less
+      than 4 hours.
+    baseline: TO_BE
+  - id: TERM-050
+    term: Weekly attendance notification
+    kind: TERM
+    definition: The notification sent to employees every Friday listing the days they were off work without
+      a leave request and the days they were off work with a valid leave request.
+    baseline: TO_BE
+  - id: TERM-051
+    term: Organisational structure
+    kind: TERM
+    definition: 'The company''s organisation as the system holds it: countries, cities and offices, and
+      the units and departments used for access and reporting.'
+    baseline: TO_BE
+  - id: TERM-053
+    term: Half day
+    kind: TERM
+    definition: Leave for the morning or the afternoon of a day. Leave is requested and counted in full
+      days and half days.
+    baseline: TO_BE
+  - id: TERM-054
+    term: Leave balance
+    kind: TERM
+    definition: 'The part of an employee''s leave entitlement not yet used. It does not go below 0: when
+      a request that exceeds it is approved, the balance stays at 0.'
+    baseline: TO_BE
+  - id: TERM-055
+    term: Cancelled
+    kind: TERM
+    definition: The status of a leave request that was not confirmed and approved by the end of the calendar
+      month of its leave start date.
+    baseline: TO_BE
+  - id: TERM-056
+    term: HR systems
+    kind: TERM
+    definition: The company's existing human resources systems, from which the people and organisation
+      data (employees, organisational structure, Line Managers, project assignments and Project Managers)
+      are imported.
+    baseline: TO_BE

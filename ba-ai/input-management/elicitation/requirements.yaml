@@ -1,0 +1,325 @@
+meta:
+  artifact_type: catalog
+  catalog: requirements
+  title: Requirements
+  status: DRAFT
+  baseline: TO_BE
+  origin: AI
+  review:
+    GATE-02: NOT_REQUESTED
+items:
+  - id: REQ-001
+    name: Submit leave request
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.1, §4.6; meeting-minutes/MoM
+      01 Oct 2026.docx (answers to Q-002, Q-003, Q-006)
+    description: An employee can submit a leave request for a leave type available to them (for example
+      Paid Leave, Maternity Leave or another type). Leave is requested in full days or half days (morning
+      or afternoon). The leave dates may be in the future, or in the past only when they fall within the
+      current month; leave from the previous month is not accepted. When submitting, the employee chooses
+      the Project Manager who will confirm the request, from the projects they are assigned to.
+    baseline: TO_BE
+  - id: REQ-002
+    name: Validate leave requests against leave policy
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §1, §3, §4.5
+    description: The system checks each leave request against the leave policy rules (leave type eligibility
+      by gender and seniority, entitlement, required documentation) and makes the result visible, so that
+      the policy is applied consistently and transparently instead of manually.
+    baseline: TO_BE
+  - id: REQ-003
+    name: Accept policy-violating leave requests for manual review
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §3, §4.1; meeting-minutes/MoM
+      01 Oct 2026.docx (answer to Q-004)
+    description: 'A leave request that violates the leave policy is not blocked: the employee can still
+      submit it, and it is subject to manual review by the Line Manager before it can be approved. A request
+      that exceeds the employee''s remaining entitlement is allowed; if it is approved, the employee''s
+      remaining balance stays at 0 (it does not go negative). Whether other kinds of violation are also
+      allowed is not yet decided (open question).'
+    baseline: TO_BE
+  - id: REQ-004
+    name: Attach required supporting documents to a leave request
+    type: FUNCTIONAL
+    priority: HIGH
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.5
+    description: When the chosen leave type requires documentation (for example a hospital certificate
+      for medical or sick leave), the employee uploads the required document with the leave request, as
+      defined in the leave type's settings.
+    baseline: TO_BE
+  - id: REQ-005
+    name: View own leave requests and their status
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.6
+    description: An employee can view the leave requests they submitted and the current status of each
+      one in the confirmation and approval workflow.
+    baseline: TO_BE
+  - id: REQ-006
+    name: Confirm or deny a leave request
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.2 (Step 1), §4.6; meeting-minutes/MoM
+      01 Oct 2026.docx (answer to Q-002)
+    description: 'Step 1 of the review workflow: the Project Manager the employee chose from their assigned
+      projects confirms or denies the employee''s leave request, within the same calendar month as the
+      leave start date.'
+    baseline: TO_BE
+  - id: REQ-007
+    name: Auto-confirm a Project Manager's own leave request
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.2 (Step 1)
+    description: When a Project Manager submits a leave request for themselves, the confirmation step
+      is completed automatically and the request goes straight to approval.
+    baseline: TO_BE
+  - id: REQ-008
+    name: Approve or reject a confirmed leave request
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.2 (Step 2), §4.6
+    description: 'Step 2 of the review workflow: the employee''s Line Manager reviews a confirmed leave
+      request and approves or rejects it, within the same calendar month as the leave start date.'
+    baseline: TO_BE
+  - id: REQ-009
+    name: Complete review and approval within the leave start month
+    type: FUNCTIONAL
+    priority: HIGH
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.2, §6; meeting-minutes/MoM
+      01 Oct 2026.docx (answer to Q-003)
+    description: All review and approval actions on a leave request (confirmation by the Project Manager
+      and approval by the Line Manager) must be completed within the calendar month of the leave start
+      date. A request not completed by then is cancelled (REQ-034).
+    baseline: TO_BE
+  - id: REQ-010
+    name: Modify and resubmit a denied or rejected leave request
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.2
+    description: After a leave request is denied by the Project Manager or rejected by the Line Manager,
+      the employee can modify it and submit it again for review.
+    baseline: TO_BE
+  - id: REQ-011
+    name: Determine off-work days from attendance data
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.3
+    description: Using the check-in/check-out times from the card scanner system, the system treats a
+      working day as an off-work day for an employee when no check-in time is recorded for that day, or
+      when the employee's total presence on that day is less than 4 hours.
+    baseline: TO_BE
+  - id: REQ-012
+    name: Send weekly attendance notification
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §3, §4.3
+    description: Every Friday the system notifies each employee of (a) the days they were off work without
+      a leave request and (b) the days they were off work but had a valid leave request, to improve compliance
+      and visibility into absenteeism without approved leave.
+    baseline: TO_BE
+  - id: REQ-013
+    name: Automated and configurable notification emails
+    type: FUNCTIONAL
+    priority: HIGH
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §3, §5
+    description: The system sends its notifications as automated emails, and the notification emails are
+      configurable. (The URS lists this under Non-Functional Requirements; it describes system behaviour,
+      so it is typed FUNCTIONAL here.)
+    baseline: TO_BE
+  - id: REQ-014
+    name: Import annual leave entitlements
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.4, §4.6
+    description: At the beginning of each year, HR/Admin can import the leave entitlements of employees.
+      Entitlements vary by seniority and gender. HR/Admin manages the entitlement data.
+    baseline: TO_BE
+  - id: REQ-015
+    name: Refresh leave data annually
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.1, §4.6
+    description: Leave data is refreshed once a year; HR/Admin manages the annual refresh.
+    baseline: TO_BE
+  - id: REQ-016
+    name: Manage leave types
+    type: FUNCTIONAL
+    priority: HIGH
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.5
+    description: Admins can manage the different types of leave the system supports, each with its own
+      eligibility rules and documentation requirements.
+    baseline: TO_BE
+  - id: REQ-017
+    name: Configure leave type eligibility rules
+    type: FUNCTIONAL
+    priority: HIGH
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.5
+    description: 'For each leave type, Admins can configure who is eligible: a leave type can be restricted
+      by gender (for example Maternity Leave only for female employees), and the entitlement of some types
+      (for example Paid Leave) varies by years of service (seniority) according to government regulations.'
+    baseline: TO_BE
+  - id: REQ-018
+    name: Configure required documentation per leave type
+    type: FUNCTIONAL
+    priority: HIGH
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.5
+    description: For each leave type, Admins can define the documents an employee must upload with a request
+      (for example a hospital certificate for "Medical Leave with Hospital Certificate").
+    baseline: TO_BE
+  - id: REQ-019
+    name: Support the suggested set of leave types
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.1, §4.7
+    description: 'The system supports at least the suggested leave types: Paid Leave, Unpaid Leave, Maternity
+      Leave, Paternity Leave, Sick Leave (with Hospital Certificate), Bereavement Leave, Study Leave and
+      Personal Leave.'
+    baseline: TO_BE
+  - id: REQ-020
+    name: Action dashboards for Project Managers and Line Managers
+    type: FUNCTIONAL
+    priority: HIGH
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.7
+    description: The system provides separate, role-specific screens. Project Managers and Line Managers
+      each have a dedicated dashboard that by default shows only the leave requests requiring their action.
+    baseline: TO_BE
+  - id: REQ-021
+    name: Filter leave request views
+    type: FUNCTIONAL
+    priority: HIGH
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.7
+    description: The leave request views can be filtered by request type, employee name, date and request
+      status (for example pending, approved, denied).
+    baseline: TO_BE
+  - id: REQ-022
+    name: Report leave statistics
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.7, §4.8
+    description: HR and Managers have reporting screens showing leave statistics, including leave usage
+      summarised by unit, department or the entire company, and reporting by country, city or office.
+    baseline: TO_BE
+  - id: REQ-023
+    name: Support a multinational organisational structure
+    type: FUNCTIONAL
+    priority: HIGH
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.7, §4.8
+    description: The company has offices in multiple cities across several countries. The system supports
+      organisational structures that reflect this (country, city, office, and units and departments),
+      enabling role-based access and reporting by country, city or office.
+    baseline: TO_BE
+  - id: REQ-024
+    name: Fetch check-in and check-out times from the card scanner system
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §2, §4.8
+    description: The system integrates with the existing card scanner (time tracking) system to obtain
+      employees' check-in and check-out times, which are used for the attendance-based notification.
+    baseline: TO_BE
+  - id: REQ-025
+    name: Web-based and mobile-responsive
+    type: NON_FUNCTIONAL
+    category: PLATFORM
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §5
+    description: The system is a web application whose screens adapt to mobile devices.
+    criteria: Delivered as a web application; every screen is usable on mobile devices through a responsive
+      layout. Supported browsers, versions and device classes are not stated (open question).
+    baseline: TO_BE
+  - id: REQ-026
+    name: Secure login and logout for all roles
+    type: NON_FUNCTIONAL
+    category: SECURITY
+    priority: HIGH
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §5
+    description: Every user role signs in securely before using the system and can sign out.
+    criteria: No function or data is reachable without authentication, for any role (Employee, Project
+      Manager, Line Manager, Admin/HR); every user can log out, which ends the session. Authentication
+      mode and session lifetime are not stated (open question).
+    baseline: TO_BE
+  - id: REQ-027
+    name: Role-based access rights
+    type: NON_FUNCTIONAL
+    category: SECURITY
+    priority: HIGH
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §3, §4.6, §4.8, §5
+    description: Access rights depend on the user's role (Employee, Project Manager, Line Manager, Admin/HR),
+      and access and reporting can be limited by country, city or office.
+    criteria: Each function and each record is available only to the roles the permission matrix allows;
+      a user with a country-, city- or office-scoped role sees only data within that scope.
+    baseline: TO_BE
+  - id: REQ-028
+    name: Scale to 33,000 users
+    type: NON_FUNCTIONAL
+    category: SCALABILITY
+    priority: HIGH
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.8
+    description: The system scales to the whole multinational company, up to 33,000 users.
+    criteria: Up to 33,000 registered users across all countries and offices. The peak number of concurrent
+      users and the response-time target under that load are not stated (open question).
+    baseline: TO_BE
+  - id: REQ-029
+    name: Handle concurrent submissions without delay
+    type: NON_FUNCTIONAL
+    category: PERFORMANCE
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.8, §5
+    description: The system handles concurrent leave request submissions without delay and keeps its performance
+      under heavy usage.
+    criteria: Concurrent submissions are processed without noticeable delay. No measurable target (response
+      time, percentile, concurrency level) is stated (open question).
+    baseline: TO_BE
+  - id: REQ-030
+    name: Reliable under heavy usage
+    type: NON_FUNCTIONAL
+    category: RELIABILITY
+    priority: HIGH
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.8
+    description: The system remains reliable under heavy usage.
+    criteria: Reliable operation under heavy usage, up to 33,000 users. No availability or recovery target
+      is stated (open question).
+    baseline: TO_BE
+  - id: REQ-031
+    name: Multi-language localisation
+    type: NON_FUNCTIONAL
+    category: INTERNATIONALISATION
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §6
+    description: The system should be localised (multi-language) if needed.
+    criteria: User interface and notifications can be presented in more than one language when required.
+      The languages required are not stated (open question).
+    baseline: TO_BE
+  - id: REQ-032
+    name: Use card scanner data as provided
+    type: NON_FUNCTIONAL
+    category: CONSTRAINT
+    priority: MEDIUM
+    source: user-requirements/Leave_Request_User_Requirement_Spec (2).docx §4.8, §6
+    description: 'The processing logic of card scanner data is out of scope: the vendor does not implement
+      card scanner logic and only uses the data the card scanner system provides.'
+    criteria: The system reads check-in/check-out times from the card scanner system and contains no scanner
+      device or scanner data-processing logic.
+    baseline: TO_BE
+  - id: REQ-033
+    name: Import people and organisation data from the HR systems
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: meeting-minutes/MoM 01 Oct 2026.docx (answer to Q-001); user-requirements/Leave_Request_User_Requirement_Spec
+      (2).docx §4.2, §4.5, §4.8
+    description: 'The system imports the people and organisation data it needs from the company''s existing
+      HR systems: the employees (including the gender and the service start date that eligibility and
+      seniority depend on), the organisational structure (country, city, office, unit, department), each
+      employee''s Line Manager, and each employee''s assigned projects with their Project Managers.'
+    baseline: TO_BE
+  - id: REQ-034
+    name: Cancel leave requests not completed by the end of the leave start month
+    type: FUNCTIONAL
+    priority: MEDIUM
+    source: meeting-minutes/MoM 01 Oct 2026.docx (answer to Q-003); user-requirements/Leave_Request_User_Requirement_Spec
+      (2).docx §4.2, §6
+    description: A leave request that has not been confirmed and approved by the end of the calendar month
+      of its leave start date is cancelled.
+    baseline: TO_BE
