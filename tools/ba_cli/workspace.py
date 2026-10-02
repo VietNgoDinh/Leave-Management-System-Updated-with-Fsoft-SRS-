@@ -10,7 +10,7 @@ from .ids import SCOPED_HEADING_RE, TC_HEADING_RE, as_list
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$")
 FENCE_RE = re.compile(r"^\s*(```|~~~)")
-SKIP_DIRS = ("reviews/", "workflow/context/")
+SKIP_DIRS = ("reviews/", "workflow/context/", "srs/")
 
 
 def iter_headings(body: str) -> Iterator[Tuple[int, int, str]]:
@@ -47,6 +47,61 @@ def norm_heading(s: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", s).strip()
 
 
+def subsection(text: str, title: str) -> Optional[str]:
+    """The text under the first heading named `title` (any level) inside `text`, or None."""
+    want = norm_heading(title)
+    for _lvl, h, sec in sections(text):
+        if norm_heading(h) == want:
+            return sec
+    return None
+
+
+def _cells(line: str) -> List[str]:
+    s = line.strip()
+    if s.startswith("|"):
+        s = s[1:]
+    if s.endswith("|") and not s.endswith("\\|"):
+        s = s[:-1]
+    return [c.strip().replace("\\|", "|") for c in re.split(r"(?<!\\)\|", s)]
+
+
+def _is_separator(line: str) -> bool:
+    cells = _cells(line)
+    return bool(cells) and all(re.fullmatch(r":?-+:?", c) for c in cells)
+
+
+def tables(text: str) -> List[Tuple[List[str], List[List[str]]]]:
+    """Markdown tables outside code fences: (header cells, rows of cells)."""
+    out: List[Tuple[List[str], List[List[str]]]] = []
+    lines, i, in_fence = text.split("\n"), 0, False
+    while i < len(lines):
+        if FENCE_RE.match(lines[i]):
+            in_fence = not in_fence
+        elif (not in_fence and lines[i].strip().startswith("|") and i + 1 < len(lines)
+              and _is_separator(lines[i + 1])):
+            header, rows = _cells(lines[i]), []
+            i += 2
+            while i < len(lines) and lines[i].strip().startswith("|"):
+                rows.append(_cells(lines[i]))
+                i += 1
+            out.append((header, rows))
+            continue
+        i += 1
+    return out
+
+
+def column(header: List[str], name: str) -> Optional[int]:
+    """Index of the column whose header reads `name` (case and punctuation ignored)."""
+    want = norm_heading(name)
+    return next((i for i, h in enumerate(header) if norm_heading(h) == want), None)
+
+
+def field(text: str, name: str) -> Optional[str]:
+    """Value of a '- **Name:** value' line inside a section."""
+    m = re.search(r"\*\*" + re.escape(name) + r":?\*\*:?[ \t]*(.*)", text, re.I)
+    return m.group(1).strip() if m else None
+
+
 class Doc:
     """A Markdown artifact with frontmatter."""
 
@@ -72,6 +127,7 @@ class Workspace:
         self.catalog_data: Dict[str, dict] = {}
         self.items: Dict[str, dict] = {}          # id -> {"catalog", "item"}
         self.steps: Dict[str, dict] = {}          # BP-001-S01 -> {"bp", "step"}
+        self.cmuc_rules: Dict[str, dict] = {}     # CMUC-002-BR-01 -> {"cmuc", "rule"} (D-50)
         self.epics: Dict[str, dict] = {}
         self.backlog_ucs: Dict[str, dict] = {}    # UC -> {"epic", "item"}
         self.docs: Dict[str, Doc] = {}            # rel path -> Doc
@@ -116,6 +172,10 @@ class Workspace:
                     for st in as_list(item.get("steps")):
                         if isinstance(st, dict) and st.get("id"):
                             self.steps[st["id"]] = {"bp": iid, "step": st}
+                if name == "common-use-cases":
+                    for r in as_list(item.get("step_rules")):
+                        if isinstance(r, dict) and r.get("id"):
+                            self.cmuc_rules[r["id"]] = {"cmuc": iid, "rule": r}
 
     def _index_backlog(self) -> None:
         for epic in as_list(self.backlog.get("epics")):
@@ -183,6 +243,8 @@ class Workspace:
             return str(item.get(cdef.get("name_field", "name")) or item.get("name") or "")
         if iid in self.steps:
             return str(self.steps[iid]["step"].get("name", ""))
+        if iid in self.cmuc_rules:
+            return str(self.cmuc_rules[iid]["rule"].get("title", ""))
         if iid in self.epics:
             return str(self.epics[iid].get("name", ""))
         if iid in self.scoped:
@@ -192,7 +254,7 @@ class Workspace:
         return ""
 
     def known_ids(self) -> set:
-        ids = set(self.items) | set(self.steps) | set(self.scoped) | set(self.test_cases)
+        ids = set(self.items) | set(self.steps) | set(self.cmuc_rules) | set(self.scoped) | set(self.test_cases)
         ids |= {e for e in self.epics if e}
         ids |= {r.get("run_id") for r in self.runs() if r.get("run_id")}
         return ids
@@ -233,9 +295,38 @@ class Workspace:
         doc = self.docs.get(self.doc_rel("defects", uc))
         return [d for d in as_list(doc.fm.get("defects")) if isinstance(d, dict)] if doc else []
 
-    def ia_applications(self) -> List[dict]:
-        """Applications that need an information architecture (Phase 4A)."""
-        return [a for a in self.items_in("applications") if a.get("information_architecture") == "REQUIRED"]
+    def is_human(self, actor_id: str) -> bool:
+        return (self.item(actor_id) or {}).get("type") == "HUMAN"
+
+    def user_facing_applications(self) -> List[dict]:
+        """Applications used by at least one HUMAN actor: each gets a site map (D-58)."""
+        return [a for a in self.items_in("applications")
+                if any(self.is_human(x) for x in as_list(a.get("actors")))]
+
+    def per_item_items(self, cname: str, where: Optional[str] = None) -> List[dict]:
+        """The catalog items a per-item run-step output is written for (workflow per BP, site map per APP)."""
+        if cname == "applications" and where == "user_facing":
+            return self.user_facing_applications()
+        return self.items_in(cname)
+
+    def screens_of(self, uc: str) -> List[dict]:
+        return [s for s in self.items_in("screens") if uc in as_list(s.get("use_cases"))]
+
+    def ui_required(self, uc: str) -> bool:
+        """D-57: a use case has UI steps unless every actor is a SYSTEM actor and no screen lists it
+        (the company's "Scheduled Job")."""
+        item = self.item(uc) or {}
+        actors = as_list(item.get("actor"))
+        if not actors or any((self.item(a) or {}).get("type") != "SYSTEM" for a in actors):
+            return True
+        return bool(self.screens_of(uc))
+
+    def use_case_actors(self, uc: str) -> List[str]:
+        """Who may perform a use case: the actors with a permission other than NONE, else its primary actors."""
+        item = self.item(uc) or {}
+        perm = [p.get("actor") for p in as_list(item.get("permissions"))
+                if isinstance(p, dict) and p.get("access") not in (None, "NONE")]
+        return [a for a in perm if a] or as_list(item.get("actor"))
 
     def doc_rel(self, artifact_type: str, uc: str) -> str:
         return schema.artifact_type(artifact_type)["path"].format(UC=uc)

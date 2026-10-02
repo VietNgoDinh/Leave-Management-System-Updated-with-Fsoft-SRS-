@@ -1,8 +1,9 @@
-schema_version: 1
+schema_version: 2
 # The single route definition (addendum D-22). Read by tools/ba; explained in workflow.md.
 # implemented: false marks phases that have no engine yet.
-# Milestone 2 (addendum §13) adds every MODE_B engine: elicitation, overview, technical baseline,
-# planning, information architecture, and per use case technical review, coding, QA and user guide.
+# Milestone 2 (addendum §13) adds every MODE_B engine. §14 (D-45 – D-64) aligns the artifacts with the
+# company SRS structure: folders, use cases as functions, step rules, the behaviour step before sequence
+# and API, the no-UI path for system use cases, and the site map of every user-facing application.
 milestone: 2
 
 modes:
@@ -49,8 +50,10 @@ modes:
 #   requires_input   folders that must hold material before the step can run
 #   outputs          documents it writes; built_from = the inputs `tools/ba stamp` records (a trailing ?
 #                    marks an optional input that may still be empty)
+#   per_item         one document per catalog item (a workflow per business process, a site map per
+#                    user-facing application); `where: user_facing` keeps applications used by a HUMAN actor
 #   catalogs         catalogs it fills (through `tools/ba catalog`); each must end up with at least one item
-#   per_application  one document per application whose information_architecture is REQUIRED
+#   stories          every planned use case has at least one user story (D-60)
 # A step is complete once the next gate on the route approves its outputs, or — with no gate after it —
 # once its outputs exist, are current and are valid (see `tools/ba next`).
 run_steps:
@@ -59,22 +62,39 @@ run_steps:
     name: Requirement Elicitation
     agent: elicitation-agent
     skills: [elicit-requirements, generate-clarification-questions]
-    requires_input: [requirements/raw/]
+    requires_input: [input-management/user-requirements/]
     outputs:
-      - path: requirements/elicitation/elicitation-summary.md
-        built_from: [requirements/raw/, "requirements/meetings/?"]
-    catalogs: [requirements]
+      - path: input-management/elicitation/elicitation-summary.md
+        built_from: [input-management/user-requirements/, "input-management/meeting-minutes/?",
+                     "input-management/reference-documents/?"]
+    catalogs: [requirements, glossary]
     stakeholder_wait: true        # OPEN questions marked blocking → WAITING_FOR_HUMAN (master §8 step 2.5)
   OVERVIEW:
     phase: "3"
     name: Overview Analysis
     agent: overview-analysis-agent
     skills: [write-product-overview, model-business-processes, extract-business-rules, build-data-model,
-             define-use-cases]
+             define-use-cases, adapt-company-standards]
     outputs:
-      - path: overview/product-overview.md
-        built_from: ["requirements/elicitation/elicitation-summary.md?", requirements/requirements.yaml]
+      - path: high-level-requirements/product-overview.md
+        built_from: ["input-management/elicitation/elicitation-summary.md?",
+                     input-management/elicitation/requirements.yaml]
+      # D-53: the company's conventions, adapted for the product (no inputs: they start from company-standards/)
+      - path: other-requirements/field-controls.md
+        built_from: []
+      - path: other-requirements/message-configuration.md
+        built_from: []
+      - path: other-requirements/list-behaviour.md
+        built_from: []
+    per_item:
+      # D-56: one workflow document per process. Its stamp records the process (its ID is the document's id),
+      # so changing the process's steps or branches makes the workflow STALE.
+      - path: high-level-requirements/workflows/{BP}.md
+        catalog: business-processes
+        built_from: []
     catalogs: [actors, applications, business-processes, business-rules, entities, use-cases]
+    # common-use-cases.yaml is a GATE-02 artifact, so it must exist; it may be empty (`tools/ba catalog init`)
+    # when the product has no "Manage X" function.
   TECH_BASELINE:
     phase: "6A"
     name: Technical Architecture Baseline (designed)
@@ -82,16 +102,17 @@ run_steps:
     skills: [design-technical-baseline]
     outputs:
       - path: technical/architecture/architecture.md
-        built_from: [overview/product-overview.md, overview/applications.yaml, "overview/integrations.yaml?",
-                     overview/data-model/entities.yaml]
+        built_from: [high-level-requirements/product-overview.md, high-level-requirements/applications.yaml,
+                     "high-level-requirements/integrations.yaml?", high-level-requirements/objects.yaml]
       - path: technical/coding-rules/frontend.md
         built_from: [technical/architecture/architecture.md]
       - path: technical/coding-rules/backend.md
         built_from: [technical/architecture/architecture.md]
       - path: technical/security/security-rules.md
         built_from: [technical/architecture/architecture.md]
-      - path: ui/design-system.md
-        built_from: [overview/product-overview.md, overview/applications.yaml]
+      - path: technical/design-system.md
+        built_from: [high-level-requirements/product-overview.md, high-level-requirements/applications.yaml,
+                     other-requirements/field-controls.md, other-requirements/list-behaviour.md]
     catalogs: [services, repositories]
   PLANNING:
     phase: "4"
@@ -99,20 +120,25 @@ run_steps:
     agent: planning-agent
     skills: [plan-backlog]
     backlog: true                 # every use case in the catalog must be planned into an epic
+    stories: true                 # and have at least one user story (D-60)
+    catalogs: [user-stories]
   INFORMATION_ARCHITECTURE:
     phase: 4A
-    name: Information Architecture
+    name: Site Map (Information Architecture)
     agent: planning-agent
-    skills: [design-information-architecture]
-    per_application:
-      path: planning/information-architecture/{APP}.md
-      built_from: [overview/product-overview.md, overview/actors.yaml, overview/applications.yaml,
-                   overview/use-cases.yaml]
+    skills: [design-site-map]
+    per_item:
+      - path: high-level-requirements/site-map/{APP}.md       # D-58: every user-facing application
+        catalog: applications
+        where: user_facing
+        built_from: [high-level-requirements/product-overview.md, high-level-requirements/actors.yaml,
+                     high-level-requirements/applications.yaml, high-level-requirements/use-cases.yaml]
 
 # Human gates (master spec §37 + addendum D-08). Artifact paths are relative to ba-ai/;
 # {UC} is the use case, a trailing / means "the whole folder".
 # revise_agent: who applies reviewer comments (run-level gates; on a use-case gate it narrows the owners).
 # pre_review: an AI reviewer with a fresh context checks the artifacts before the human sees them (D-40).
+# views: generated read-only views the reviewer reads next to the YAML (never hashed: the YAML is).
 pre_review:
   max_rounds: 2                 # after two rounds the gate is requested anyway, with any findings left listed
 gates:
@@ -129,21 +155,35 @@ gates:
     implemented: true
     revise_agent: overview-analysis-agent
     review_focus:
-      - Business process and its steps
-      - Use case list — including risk_level / risk_flags for each use case
-      - Data model (entities, attributes, relationships, lifecycle) — downstream UI and APIs depend on it
-      - Critical business rules
+      - Requirements typed FUNCTIONAL or NON_FUNCTIONAL; every NFR has a category and measurable criteria
+      - Glossary — terms, abbreviations and notation the documents use
+      - Business processes and their workflow documents (swimlane diagram and explanation)
+      - Use cases as functions — objective, object, allowed states and the permission matrix (O / O* / O** / X)
+      - Use case diagram — every function an actor needs, with risk_level / risk_flags
+      - Objects (data model) — attributes and their constraints, relationships, lifecycle (state transitions)
+      - Business rules — policy rules, and the common rules (kind COMMON) use cases apply by reference
+      - Company conventions — common use cases (CMUC), field controls, messages, list behaviour
       - Integrations and system boundaries
     artifacts:
-      - overview/product-overview.md
-      - requirements/requirements.yaml
-      - overview/actors.yaml
-      - overview/applications.yaml
-      - overview/business-processes.yaml
-      - overview/business-rules.yaml
-      - overview/data-model/entities.yaml
-      - overview/integrations.yaml
-      - overview/use-cases.yaml
+      - high-level-requirements/product-overview.md
+      - input-management/elicitation/requirements.yaml
+      - appendices/glossary.yaml
+      - high-level-requirements/actors.yaml
+      - high-level-requirements/applications.yaml
+      - high-level-requirements/business-processes.yaml
+      - high-level-requirements/workflows/
+      - high-level-requirements/business-rules.yaml
+      - high-level-requirements/objects.yaml
+      - high-level-requirements/integrations.yaml
+      - high-level-requirements/use-cases.yaml
+      - functional-requirements/common-use-cases.yaml
+      - other-requirements/
+    views:
+      - high-level-requirements/object-relationship-diagram.view.md
+      - high-level-requirements/state-transition.view.md
+      - high-level-requirements/use-case-diagram.view.md
+      - high-level-requirements/permission-matrix.view.md
+      - non-functional-requirements/non-functional-requirements.view.md
   GATE-03:
     pre_review: true
     name: UI_MARKDOWN_REVIEW
@@ -152,12 +192,14 @@ gates:
     implemented: true
     review_focus:
       - Screen flow and navigation
-      - Missing information (fields, columns, states, messages)
-      - Business behaviour matches the use case and its rules
+      - Each screen's component table — component types from the field controls, editable, mandatory, default value
+      - Missing information (components, columns, data source and default sorting of lists, states)
+      - Every message shows its code (EMSG, IEM, CFD, SCD, INF) and the catalog text
+      - Every button refers to the use case it triggers
+      - Alignment with the use case, its rules and its permissions
       - Usability
-      - Alignment with the requirement
     artifacts:
-      - ui/markdown/{UC}.md
+      - functional-requirements/mockup-screens/{UC}.md
   GATE-04:
     pre_review: true
     name: HTML_PROTOTYPE_REVIEW
@@ -170,7 +212,7 @@ gates:
       - Validation messages and error/success behaviour
       - States (empty, loading, error) via the prototype controls panel
     artifacts:
-      - ui/prototypes/{UC}/
+      - functional-requirements/mockup-screens/prototypes/{UC}/
   GATE-05:
     pre_review: true
     name: BA_SPEC_APPROVAL
@@ -178,17 +220,20 @@ gates:
     reviewer: BA
     implemented: true
     review_focus:
-      - The compiled specification reads as one consistent, code-ready story
-      - Every validation traces to a business rule or requirement
-      - Acceptance criteria are testable and cover rules, alternate and error flows
+      - The compiled specification reads as one consistent, code-ready story in the company layout
+      - The activities flow and its step rules (Step | BR Code | Description) match the approved screens
+      - Every Validating rule shows a message code; every Confirmation rule a CFD code
+      - Common use cases followed — the specification states only what differs from them
+      - Email templates — recipients, subject, body, every placeholder bound to its source
+      - Acceptance criteria are testable and cover every step rule, alternate and error flow
       - Open questions and assumptions are acceptable to carry forward
-      - Sequence and API design match the approved UI (SA reviews them in depth at GATE-06)
+      - Sequence and API design match the behaviour (SA reviews them in depth at GATE-06)
     artifacts:
+      - functional-requirements/use-case-specifications/{UC}/behaviour.md
       - technical/sequence/{UC}.md
       - technical/api/{UC}.md
-      - specifications/analysis/{UC}-activity.md
-      - specifications/analysis/{UC}-acceptance.md
-      - specifications/use-cases/{UC}.md
+      - functional-requirements/use-case-specifications/{UC}/acceptance.md
+      - functional-requirements/use-case-specifications/{UC}/spec.md
   GATE-06:
     pre_review: true
     name: TECHNICAL_APPROVAL
@@ -198,7 +243,7 @@ gates:
     review_focus:
       - API design — methods, paths, payloads, status codes, conventions of the baseline
       - Service boundaries and cross-service calls in the sequence
-      - Security — authentication, authorization, data protection
+      - Security — authentication, authorization (the permission matrix), data protection
       - Integration approach and database impact
       - Performance concerns and technical feasibility
       - TECHNICAL open questions the analysis left for you
@@ -226,7 +271,7 @@ gates:
     reviewer: BA
     implemented: true
     review_focus:
-      - Terminology matches the product and the business
+      - Terminology matches the glossary and the product
       - Screenshots show the implemented application, step by step
       - Process accuracy against the approved flow
       - Clarity for the actor who uses the feature
@@ -242,8 +287,8 @@ gates:
     review_focus:
       - Technology stack and application architecture
       - API conventions (the spec engine designs APIs against them)
-      - Security rules, error handling, logging, testing conventions
-      - Design system the prototypes will follow
+      - Security rules — how the permission matrix is enforced, error handling, logging, testing conventions
+      - Design system — visual design only (behaviour conventions are Other Requirements, approved at GATE-02)
       - TECHNICAL open questions — choices only the SA can make
     artifacts:
       - technical/architecture/architecture.md
@@ -251,7 +296,7 @@ gates:
       - technical/coding-rules/frontend.md
       - technical/coding-rules/backend.md
       - technical/security/security-rules.md
-      - ui/design-system.md
+      - technical/design-system.md
   GATE-10:
     pre_review: true
     name: CODE_REVIEW
@@ -270,6 +315,7 @@ gates:
       - qa/test-results/{UC}.md
 
 # Per-use-case engine (master spec Phases 5–9). Runs for each use case in the run's scope.
+# ui: true marks the UI steps a system use case skips — every actor SYSTEM and no screen lists it (D-57).
 use_case_engine:
   requires_gates: [GATE-02, GATE-09]   # run-level approvals needed before any use case starts
   dependency_gate: GATE-05             # a dependency is satisfied when its spec is approved
@@ -288,6 +334,7 @@ use_case_engine:
       artifact_type: ui-markdown
       built_from: []
       gate: GATE-03
+      ui: true
     - step: "5.3"
       name: Interactive HTML Prototype
       phase: SPECIFICATION
@@ -296,41 +343,43 @@ use_case_engine:
       artifact_type: ui-prototype
       built_from: [ui-markdown]
       gate: GATE-04
+      ui: true
+    # D-48: business behaviour comes right after the approved screens; sequence and API are derived from it.
     - step: "5.4"
+      name: Use Case Behaviour (activities flow, step rules, emails)
+      phase: SPECIFICATION
+      agent: spec-agent
+      skills: [write-use-case-behaviour]
+      artifact_type: use-case-behaviour
+      built_from: ["ui-markdown?", "ui-prototype?"]
+    - step: "5.5"
       name: Sequence Analysis
       phase: SPECIFICATION
       agent: technical-analysis-agent
       skills: [generate-sequence-diagram]
       artifact_type: sequence
-      built_from: [ui-markdown, ui-prototype]
-    - step: "5.5"
+      built_from: [use-case-behaviour, "ui-markdown?", "ui-prototype?"]
+    - step: "5.6"
       name: API Analysis and Design
       phase: SPECIFICATION
       agent: technical-analysis-agent
       skills: [design-api]
       artifact_type: api-design
-      built_from: [sequence]
-    - step: "5.6"
-      name: Activity and Validation Analysis
-      phase: SPECIFICATION
-      agent: technical-analysis-agent
-      skills: [analyze-validation]
-      artifact_type: activity-validation
-      built_from: [ui-markdown, api-design]
+      built_from: [sequence, use-case-behaviour]
     - step: "5.7"
       name: Acceptance Criteria
       phase: SPECIFICATION
       agent: spec-agent
       skills: [write-acceptance-criteria]
       artifact_type: acceptance-criteria
-      built_from: [ui-markdown, api-design, activity-validation]
+      built_from: [use-case-behaviour, api-design, "ui-markdown?"]
     - step: "5.8"
       name: Compile Code-Ready BA Specification
       phase: SPECIFICATION
       agent: spec-agent
       skills: [compile-use-case-spec]
       artifact_type: use-case-specification
-      built_from: [ui-markdown, ui-prototype, sequence, api-design, activity-validation, acceptance-criteria]
+      built_from: [use-case-behaviour, sequence, api-design, acceptance-criteria, "ui-markdown?", "ui-prototype?"]
       gate: GATE-05
     - step: "6"
       name: Technical / SA Review
@@ -345,7 +394,7 @@ use_case_engine:
       agent: qa-agent
       skills: [generate-test-cases]
       artifact_type: test-cases
-      built_from: [use-case-specification, acceptance-criteria, activity-validation, api-design, ui-prototype]
+      built_from: [use-case-specification, acceptance-criteria, use-case-behaviour, api-design, "ui-prototype?"]
       needs_repositories: true
       pre_command: tools/ba coding authorize {UC}
     - step: "7"
@@ -354,7 +403,7 @@ use_case_engine:
       agent: coding-agent
       skills: [implement-use-case]
       artifact_type: implementation
-      built_from: [use-case-specification, api-design, ui-prototype]
+      built_from: [use-case-specification, api-design, "ui-prototype?"]
       needs_repositories: true
       pre_command: tools/ba coding authorize {UC}
     - step: "8.2"
@@ -392,8 +441,9 @@ use_case_engine:
     ui_status:
       artifact_types: [ui-markdown, ui-prototype]
       gates: [GATE-03, GATE-04]
+      ui: true                     # NOT_APPLICABLE for a system use case with no screens (D-57)
     spec_status:
-      artifact_types: [sequence, api-design, activity-validation, acceptance-criteria, use-case-specification]
+      artifact_types: [use-case-behaviour, sequence, api-design, acceptance-criteria, use-case-specification]
       gates: [GATE-05]
     technical_review_status:
       artifact_types: []

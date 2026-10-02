@@ -90,8 +90,11 @@ def brief(gid_arg: str, subject_arg: str) -> str:
             skills = (step or {}).get("skills", [])
         else:
             out = schema.run_output_for(rel)
+            folder_step = schema.run_step_for_folder(rel) if rel.endswith("/") else None
             if out:
                 skills = (schema.run_step(out["step"]) or {}).get("skills", [])
+            elif folder_step:   # a folder of documents (workflows, other requirements)
+                skills = (schema.run_step(folder_step) or {}).get("skills", [])
             else:   # a catalog: the run step that fills it
                 skills = next((sd.get("skills", []) for sd in schema.run_steps().values()
                                if schema.catalog_for_path(rel) in (sd.get("catalogs") or [])), [])
@@ -105,6 +108,8 @@ def brief(gid_arg: str, subject_arg: str) -> str:
         "gate": gid, "subject": subject, "human_reviewer": g.get("reviewer"),
         "review_focus": g.get("review_focus", []),
         "artifacts": arts,
+        # Generated read-only views of the YAML under review (D-59): read them as the human will.
+        "views": [paths.show(v) for v in g.get("views", []) if (paths.BA / v).exists()],
         "round": st.get("round"), "max_rounds": max_rounds(),
         "previous_findings": (prev[-1].get("findings") if prev else []) or [],
         "context_package": (f"ba-ai/workflow/context/{subject}.yaml" if g["subject"] == "USE_CASE" else None),

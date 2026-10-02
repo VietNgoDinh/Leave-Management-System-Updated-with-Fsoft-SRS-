@@ -2,9 +2,9 @@
 
 | | |
 |---|---|
-| Status | **APPROVED** (2026-09-30) — §1–§12. §13 (milestone 2, D-28 – D-44) is **PROPOSED** (2026-10-02); D-37 – D-44 were requested by the BA after the review of the master spec |
+| Status | **APPROVED** (2026-09-30) — §1–§12. §13 (milestone 2, D-28 – D-44) is **PROPOSED** (2026-10-02); D-37 – D-44 were requested by the BA after the review of the master spec. §14 (company SRS alignment, D-45 – D-64) was decided by the BA on 2026-10-02 |
 | Amends | [master-spec.md](master-spec.md) |
-| Date | 2026-09-30, extended 2026-10-02 |
+| Date | 2026-09-30, extended 2026-10-02 (§13, §14) |
 
 Where this addendum and the master spec disagree, **this addendum wins**. Each decision has an ID (D-nn), so you can approve or change any one of them on its own. §10 lists every place this document changes the master spec.
 
@@ -680,3 +680,252 @@ The BA asked for a review of the master spec's approach, which was drafted by an
 7. QA passes, then GATE-10, GATE-07 (if risky), the user guide, GATE-08 and `status: DONE`.
 8. The milestone-1 Leave Management run keeps its exact position and every gate status after the upgrade.
 
+
+---
+
+## 14. Company SRS alignment (decided by the BA, 2026-10-02)
+
+**Goal:** the kit's artifacts, vocabulary and published output follow the company's System Requirement Specification — the SRS template (`Customer Name_Project Name_System Requirement Specification_v0.9`) and the documentation tree (Input Management, High Level Requirements, Functional Requirements, Agile Project, Non-Functional Requirements, Other Requirements, Data Migration, Appendices). The kit's engine stays: catalogs, stable IDs, hash-bound gates, staleness, the graph and per-use-case delivery. The company template defines *what a finished SRS contains and how precise a use case and a screen must be*; the kit defines *how that content is produced, reviewed, kept consistent and traced*.
+
+The BA's decisions on the comparison, 2026-10-02:
+- **D1** folders follow the company structure (option a). **D2** BR-NNN stays for policy and common rules; step rules are `UC-NNN-BR-nn` (option a). **D4** user stories return as tracking items (option a); the kit decides how many per use case. **D5** behaviour before sequence and API (option a). **D6** Markdown always, Word on request through the docx skill, **no sign-off gate**.
+- **Function = use case, one to one**, and use cases keep their size: no `UC-NNN-Fnn` (this replaces option A1 and D3 of the comparison).
+- **Common use cases (CMUC) give delta specifications**: a "Manage X" use case states only what differs; the CMUC library ships as editable examples.
+- **One workflow document per business process**, in a folder.
+- **Data migration is not in scope.** Reference documents get their own input folder; no references catalog.
+
+**D-45 The BA folders follow the company SRS structure.** This replaces master §5 for the BA content; engine and delivery folders are unchanged.
+
+```text
+ba-ai/
+├── input-management/         meeting-minutes/ · user-requirements/ · reference-documents/ ·
+│                             elicitation/ (elicitation summary, requirements, open questions, assumptions)
+├── high-level-requirements/  product-overview.md · actors · applications · integrations · objects ·
+│                             business-processes · workflows/<BP>.md · business-rules · use-cases ·
+│                             site-map/<APP>.md · generated views (ORD, state transition, UC diagram, matrix)
+├── functional-requirements/  use-case-specifications/<UC>/ (behaviour, acceptance, spec) ·
+│                             mockup-screens/ (screen catalog, <UC>.md, prototypes/, screens/ views) ·
+│                             common-use-cases.yaml · objects/ (generated object pages)
+├── agile-project/            backlog.yaml · user-stories.yaml · epics/ (generated)
+├── non-functional-requirements/  generated view of the NON_FUNCTIONAL requirements
+├── other-requirements/       field-controls.md · message-configuration.md · list-behaviour.md
+├── appendices/               messages.yaml · email-templates.yaml · glossary.yaml
+├── technical/ (+ design-system.md) · qa/ · user-guide/ · current-state/ · changes/
+├── workflow/ · knowledge/ · reviews/
+└── srs/                      the published SRS (tools/ba publish)
+```
+
+The placeholder folders `overview/state-models/` (made obsolete by D-31), `overview/business-processes/` and `specifications/epics/` are dropped.
+
+**D-46 A use case is one function.**
+- There is no separate Function node. A use case is one row of the use case diagram ("This function allows <actors> to …") and one row of the permission matrix. It stays the unit that is specified, built and gated.
+- It gains the function fields, reviewed at GATE-02:
+  - `objective` — the end of "This function allows <actors> to …";
+  - `object` — the entity it acts on;
+  - `permissions` — per actor: ALL (O), OWN (O*), SCOPED (O**, with its `scope`), NONE (X). Actors not listed are X: access is denied unless granted. The primary actor must have a permission;
+  - `allowed_states` — the object's states in which the function is allowed;
+  - `transitions` — the lifecycle transitions it performs;
+  - `follows` — the common use cases it follows (D-50).
+- Operations that need different permissions are separate use cases.
+
+**D-47 Business rules on two levels; step rules replace validation rules.**
+- `BR-NNN` (catalog, GATE-02) has a `kind`: POLICY (a constraint the business imposes) or COMMON (a procedure several use cases apply by reference, the company's CBR, e.g. the audit trail). Both are published as the SRS's *Common Business Rules*.
+- Step rules `UC-NNN-BR-nn` are written per use case at step 5.4: keyed to a step of the activities flow, typed Screen Displaying, Validating, Confirmation, Processing, Display/Search or Scheduled, titled "<Type> Rules", and citing the messages (codes), emails (ET) and BR they use. A step can have several rules.
+- Validation rules (`UC-NNN-VR-nn`, D-14) become step rules of type Validating; alternate and error flows (AF, EF) stay.
+
+**D-48 Business behaviour comes before sequence and API.** The Spec Engine is now: 5.2 screens → GATE-03 → 5.3 prototype → GATE-04 → **5.4 use case behaviour** (spec-agent: description, activities flow, step rules, AF/EF, emails) → 5.5 sequence → 5.6 API (technical-analysis-agent, derived from the behaviour) → 5.7 acceptance criteria → 5.8 compile → GATE-05. The previous 5.6 (validation derived from the API design) reversed the company's logic and is gone.
+
+**D-49 The use case specification follows the company skeleton.** This replaces the 20-section layout of master §21 and amends D-43. The 18 sections are:
+- 1 Use Case Description (Objective, Actor, Trigger, Pre-condition, Post-condition, Follows, Permission);
+- 2 Activities Flow;
+- 3 Business Rules (Step | BR Code | Description);
+- 4 Alternate Flows, 5 Error Flows;
+- 6 Common Business Rules;
+- 7 Screens, 8 Messages, 9 Email Templates;
+- 10 Data Entities;
+- **11 Business Context**;
+- 12 Sequence Diagram, 13 API Specification, 14 Acceptance Criteria;
+- **15 Dependencies**;
+- 16 Assumptions, 17 Open Questions, 18 Traceability.
+
+`tools/ba compile` generates all of them except the two narrative sections in bold. The spec agent writes those two.
+
+**D-50 Common use cases and delta specifications.**
+- `functional-requirements/common-use-cases.yaml` (CMUC-NNN) holds standard operations: View list, Create, Read, Update, Delete, Disable. Each has a header, an activities flow and step rules `CMUC-NNN-BR-nn`. The kit's defaults (`company-standards/common-use-cases.yaml`, from the template's CMUC 1–5 plus Disable) are adapted per project at the overview step and reviewed at GATE-02.
+- A use case that `follows` CMUCs writes only what differs, keyed to the CMUC step it changes (`CMUC-002 (4)`). The compiled spec shows the CMUC steps inline, so developers read one complete document.
+
+**D-51 Screens in the company layout.**
+- Each screen in `functional-requirements/mockup-screens/<UC>.md` has:
+  - Description and Access;
+  - Data Source and Default Sorting, for lists;
+  - the component table: # | Component | Component Type | Editable | Mandatory | Default Value | Description;
+  - States;
+  - Messages, with their codes.
+- Validation checks the design:
+  - every editable component names its source attribute (`ENT-xxx.attribute`);
+  - every button refers to the use case it triggers;
+  - every message shows the catalog's text next to its code;
+  - component types come from the field controls (a warning otherwise).
+- What a button *does* is in the step rules. The Permissions table is gone: the permission matrix is the source.
+- Screens are still designed per use case, which keeps gates and parallel work safe. One page per screen is generated (`mockup-screens/screens/<SCR>.view.md`), and the prototype is the mockup.
+
+**D-52 Message and email-template catalogs.**
+- `appendices/messages.yaml` uses the company codes. The type gives the prefix:
+  - EMSG — error dialog;
+  - IEM — inline error;
+  - CFD — confirmation;
+  - SCD — success dialog;
+  - INF — informing or warning.
+  The catalog has one schema entry with `prefix_by`. Screens and step rules cite codes; messages are reused before new ones are created.
+- `appendices/email-templates.yaml` (ET-NNN) holds, for each email: name ("Sending email to <recipient> after <event>"), trigger, to, cc, subject, body, and every `<<placeholder>>` bound to an object attribute or a special value. Validation rejects an unbound placeholder.
+- Both are stamped like other inputs. A changed message or template makes the screens and behaviours that show it STALE.
+
+**D-53 Other Requirements are BA conventions; the design system keeps the visuals.**
+- `other-requirements/` holds:
+  - field-controls.md, the 19 field controls of the company workbook;
+  - message-configuration.md;
+  - list-behaviour.md: view columns, pagination, search, bulk action.
+- They are adapted at the overview step from `company-standards/` and approved at GATE-02. Screens, prototypes and code follow them.
+- `technical/design-system.md` (moved from `ui/`) keeps only the visual design. Its required headings are Principles, Layout and Components.
+- The security rules' Authorization enforces the permission matrix instead of repeating it.
+
+**D-54 Requirements are typed; glossary; reference documents.**
+- Every requirement has `type` FUNCTIONAL or NON_FUNCTIONAL, using fields rather than a new prefix, so the IDs stay. A NON_FUNCTIONAL one has a `category` (published in the company's sections: Performance, Safety, Security, Software Quality Attributes) and measurable `criteria`.
+- `appendices/glossary.yaml` (TERM-NNN) holds terms, abbreviations and notation. It is built at elicitation from the company defaults and the product's words, and reviewed at GATE-02. Every agent uses it, and GATE-08 checks the guide's terminology against it.
+- `input-management/reference-documents/` is an input folder. The SRS's References table lists it and the user requirement documents; there is no references catalog.
+
+**D-55 Company notation and naming.**
+- Notation: `[Field]`, `{Object}`, `"Value"`, `<Special Value>`, `<<Placeholder>>`, step numbers `(n)`, and the permission symbols.
+- Names:
+  - use cases are verb + object;
+  - screens are "<Name> screen";
+  - step rules are "<Type> Rules";
+  - emails are "Sending email to <recipient> after <event>".
+- IDs keep the kit's convention (`IEM-002`, not "IEM 2") and are never renumbered.
+
+**D-56 Actors, objects and processes carry the company's detail.**
+- A HUMAN actor has a `role_mapping`, completing "The system recognises the user as <actor> when …". Its permission summary is generated from the matrix.
+- Entity attributes may state `mandatory`, `unique`, `max_length`, `format`, `allowed_values`, `default` and `generated`.
+- Process steps may branch: `next: [{to, when}]`.
+- Each process has a workflow document, `high-level-requirements/workflows/<BP>.md`: a swimlane diagram and the workflow explanation. Validation checks that it shows every step. It is written at the overview step and reviewed at GATE-02 (the folder is a gate artifact).
+
+**D-57 System use cases have no UI steps.**
+- When every actor of a use case is a SYSTEM actor and no screen lists it, steps 5.2–5.3 and GATE-03 and GATE-04 are skipped, and its `ui_status` is NOT_APPLICABLE. This is the company's "Scheduled Job".
+- Listing a screen for it brings the UI steps back.
+- This fixes a latent defect: UC-006, UC-008 and UC-011 would otherwise have been forced to invent screens.
+
+**D-58 Every user-facing application has a site map.**
+- Phase 4A (run step INFORMATION_ARCHITECTURE, ID unchanged) writes `high-level-requirements/site-map/<APP>.md` for every application a HUMAN actor uses. It holds the Site Map diagram, the company's Page | Description | Permission table, the structure, the menu and the entry points.
+- The `information_architecture` flag now only decides whether the navigation is designed from scratch (REQUIRED) or documented from the existing application.
+- The role-based visibility matrix is dropped: page permissions follow the permission matrix.
+
+**D-59 Generated company views.** `tools/ba sync` writes read-only views, with no token cost:
+- the Object Relationship Diagram, with objects, actors and external systems, and the Object Description table grouped as Object / Actor / External System;
+- the State Transition diagram of each stateful object;
+- the Use Case Diagram and its table (#, UC Name, "This function allows…") per business process;
+- the Permission Matrix, function × role, grouped by object and then by status, with the scope rules;
+- the workflows;
+- one Object specification page per object, one page per screen and one per epic;
+- the Non-Functional Requirements;
+- the company-format views of the message list, email templates, glossary, common use cases and user stories.
+
+GATE-02's `views` list names the ones the BA reads with the YAML.
+
+**D-60 User stories return as tracking items** (supersedes D-15).
+- `agile-project/user-stories.yaml` (US-NNN) holds one story per use case by default. A use case may have more when its parts are delivered separately, e.g. one per CMUC operation.
+- Stories are written through `tools/ba backlog plan` (`stories` per use case; IDs from the tool). Each REALIZES its use case and lists its acceptance criteria (all of the use case's unless stated).
+- Planning is complete when every planned use case has a story.
+- Stories have no gate: the use case stays the specification and delivery unit, so D-15's reasoning still holds for specifications.
+
+**D-61 The SRS is published by the tool; no sign-off gate.**
+- `tools/ba publish` writes `ba-ai/srs/`: one page per node of the company tree, plus `SRS.md`. `SRS.md` follows the template's chapter order, with the documentation tree's extra nodes inserted where the tree places them:
+  1. Introduction (Purpose, Overview from the product overview, Intended Audience, Abbreviations from the glossary, References from the input folders);
+  2. Input Management;
+  3. High Level Requirements;
+  4. Functional Requirements (Object, Use Case Specifications with the company sections only, Common Use Cases, Common Business Rule);
+  5. Mockups Screen;
+  6. Agile Project;
+  7. Non-Functional Requirements;
+  8. Other Requirements;
+  9. Integration;
+  10. Data Migration;
+  11. Appendices (Message List, Email Templates, Glossary, Open Questions and Assumptions).
+- The technical sections stay in the workspace; the SRS ends at requirements.
+- Word on request: the docx skill converts `SRS.md`. There is no python-docx dependency, so D-03 is unchanged.
+- No sign-off gate (BA decision). The customer signs the published SRS outside the kit.
+
+**D-62 Data migration is not in scope.** There is no folder and no step. The SRS chapter says "Not in scope", keeping the company's chapter order.
+
+**D-63 Migrating an existing workspace.**
+- `tools/ba migrate` moves the files of the milestone-2 layout to the company folders. It rewrites the `built_from` paths and the `ba-ai/…` mentions, removes the old views and placeholder folders, and never touches `reviews/`.
+- Gate decisions are keyed by path, so every approval given under an old path lapses: the gate shows INVALIDATED or OUTDATED.
+- No path map was added to `gates.py` (a protected file, D-36). Every artifact gated so far changes content under D-46 – D-58 anyway: requirement types, role mappings, rule kinds, the function fields, the design system, the screen format. Keeping the old approvals would have kept nothing.
+- A future migration that must preserve approvals across a move needs that map, in a maintenance session.
+
+**D-64 New graph nodes, edges and consistency checks.**
+- New nodes: UserStory, Message, EmailTemplate, GlossaryTerm, CommonUseCase, StepRule.
+- New edges:
+  - UseCase ACTS_ON Entity, FOLLOWS CommonUseCase, HAS_STEP_RULE StepRule;
+  - Actor MAY_PERFORM UseCase (with the access and scope);
+  - StepRule APPLIES BusinessRule, SHOWS Message, SENDS EmailTemplate, CHANGES_STATE Entity (with the transition);
+  - Screen SHOWS Message, REFERS_TO UseCase;
+  - EmailTemplate READS Entity;
+  - Epic CONTAINS UserStory, UserStory REALIZES UseCase;
+  - ProcessStep NEXT ProcessStep.
+- A reverse lookup from a message code or an email template reaches its screens, step rules, use case and process.
+- New checks:
+  - every lifecycle transition is performed by a use case (a warning);
+  - every primary actor has a permission, and every O** a scope;
+  - every button refers to a use case;
+  - every email placeholder is bound;
+  - every message code exists and its text matches;
+  - every workflow shows its process's steps;
+  - every step rule is keyed to a step of the flow and typed.
+
+### Changes to the master spec and earlier decisions
+
+| Was | Now | Decision |
+|---|---|---|
+| Master §5 BA folders (`requirements/`, `overview/`, `planning/`, `specifications/`, `ui/`) | The company structure | D-45 |
+| Master §21 (20 sections); D-43 (13 generated, 7 narrative) | 18 sections, company skeleton first; 16 generated, 2 narrative | D-49 |
+| D-14 `<UC>-VR-nn` validation rules | `<UC>-BR-nn` step rules (Validating type); new prefixes CMUC, US, ET, EMSG, IEM, CFD, SCD, INF, TERM | D-47, D-50 – D-55 |
+| D-15 UserStory dropped | User stories as tracking items | D-60 |
+| D-17 catalog list | + messages, email templates, glossary, common use cases, user stories | D-50, D-52, D-54, D-60 |
+| D-22 Spec Engine 5.4 sequence → 5.5 API → 5.6 validation | 5.4 behaviour → 5.5 sequence → 5.6 API | D-48 |
+| D-27 prototypes in `ui/prototypes/`, styling from `ui/design-system.md` | `functional-requirements/mockup-screens/prototypes/`; visual design in `technical/design-system.md`, behaviour in `other-requirements/` | D-45, D-53 |
+| D-31 state model rendered in the product overview | Generated State Transition views | D-59 |
+| D-32 IA only for `information_architecture: REQUIRED` | A site map for every user-facing application | D-58 |
+| Every use case passes 5.2–5.3 | System use cases without screens skip them | D-57 |
+
+### Built
+
+- **Schemas:**
+  - catalogs: messages (with `prefix_by`), email templates, glossary, common use cases, user stories, and the new fields;
+  - artifact types: workflow, site-map, field-controls, message-configuration, list-behaviour, use-case-behaviour; the new layout of the use case specification; the moved paths.
+- **`tools/ba`:**
+  - per-item run-step outputs (a workflow per process, a site map per user-facing application);
+  - the no-UI path and the user-story completion check;
+  - `catalog add --file` with a list;
+  - `publish` and `migrate`.
+  - The validation checks and graph edges of D-64; the company views (`srs.py`); the new compile layout; richer context packages (object, permissions, CMUCs, messages, email templates, conventions).
+- **Company defaults** in `company-standards/`: field controls (19, deduplicated), message configuration, list behaviour, CMUC 1–6, the audit-trail common rule, default messages, glossary seeds, email conventions.
+- **Skills:**
+  - new: `adapt-company-standards`, `write-use-case-behaviour` (replaces `analyze-validation`), `design-site-map` (replaces `design-information-architecture`);
+  - rewritten: `design-screen-markdown`, `compile-use-case-spec`, `define-use-cases`;
+  - updated: the elicitation, overview, planning, baseline, sequence, API, acceptance, prototype, test, coding, review and user-guide skills.
+- **Agents, `CLAUDE.md`, `README.md` and `workflow.md`** updated.
+- **Regression tests** (`tools/tests/test_mode_b.py`): the fixture uses the company layout. New tests cover NFR typing, workflows, the function fields, the permission matrix and views, the no-UI path, screens and messages, email placeholders, step rules, CMUC delta specifications, the compile layout, the graph's reverse lookup, user stories, `publish` and `migrate` (34 tests).
+
+### Leave Management after the migration
+
+- `tools/ba migrate` moved the workspace on 2026-10-02.
+- The approvals of GATE-02, GATE-09 and UC-001's GATE-03 lapsed (D-63). The waiting GATE-03 reviews of UC-002, UC-004 and UC-007, and UC-001's GATE-04, are outdated.
+- `/ba-next` then regenerates in route order:
+  1. elicitation (requirement types, glossary, the elicitation summary the hand-written milestone-1 overview never had);
+  2. overview (role mappings, rule kinds, the function fields of the eleven use cases, workflows, the adapted conventions);
+  3. GATE-02;
+  4. the technical baseline (visual design system, security rules referring to the matrix);
+  5. GATE-09;
+  6. user stories, and APP-001's first site map;
+  7. the screen designs of UC-001, UC-002, UC-004 and UC-007 in the company format, followed by their GATE-03 reviews and UC-001's prototype and GATE-04.
+- No use case had reached step 5.4, so nothing of the specification engine had to be migrated.

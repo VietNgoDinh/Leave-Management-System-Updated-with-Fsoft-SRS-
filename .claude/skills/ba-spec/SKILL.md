@@ -1,6 +1,6 @@
 ---
 name: ba-spec
-description: Run the BA Specification Engine (master spec Phase 5) — functional UI, prototype, sequence, API, validation, acceptance criteria and compiled spec — for a use case or an epic.
+description: Run the BA Specification Engine (master spec Phase 5) — screens, prototype, use case behaviour, sequence, API, acceptance criteria and the compiled specification — for a use case or an epic.
 argument-hint: "[UC-ID | EPIC-ID]"
 ---
 

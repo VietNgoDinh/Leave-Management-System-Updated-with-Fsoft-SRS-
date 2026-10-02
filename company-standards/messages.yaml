@@ -1,0 +1,21 @@
+# Company default messages, from the SRS template's Messages List (texts corrected where the template
+# was ungrammatical). The overview agent adds the ones the product's common use cases need:
+#   tools/ba catalog add messages --file company-standards/messages.yaml
+# The tool allocates the code from the type: ERROR_DIALOG → EMSG, INLINE_ERROR → IEM,
+# CONFIRMATION → CFD, SUCCESS → SCD, INFORMING → INF (addendum D-52).
+items:
+  - type: INLINE_ERROR
+    text: Please input in this field.
+    use: A mandatory field is blank.
+  - type: INLINE_ERROR
+    text: This value already exists. Enter a different value.
+    use: A field that must be unique has the value of another item.
+  - type: CONFIRMATION
+    text: Are you sure you want to cancel?
+    use: The user leaves a form with unsaved changes.
+  - type: CONFIRMATION
+    text: Are you sure you want to delete this item?
+    use: Delete Item (common use case).
+  - type: CONFIRMATION
+    text: Are you sure you want to disable this item?
+    use: Disable Item (common use case).

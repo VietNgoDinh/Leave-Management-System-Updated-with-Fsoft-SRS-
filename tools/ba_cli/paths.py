@@ -7,15 +7,17 @@ from pathlib import Path
 ROOT = Path(os.environ.get("BA_ROOT") or Path(__file__).resolve().parents[2]).resolve()
 BA = ROOT / "ba-ai"
 SCHEMAS = ROOT / "tools" / "schemas"
+STANDARDS = ROOT / "company-standards"          # the company's SRS defaults, adapted per project (D-53)
 
 WORKFLOW_YAML = BA / "workflow" / "workflow.yaml"
 STATE = BA / "workflow" / "state.json"
 CONTEXT_DIR = BA / "workflow" / "context"
-BACKLOG = BA / "planning" / "backlog.yaml"
+BACKLOG = BA / "agile-project" / "backlog.yaml"
 REGISTRY = BA / "knowledge" / "id-registry.json"
 GRAPH = BA / "knowledge" / "ba-graph.json"
 REQUESTS = BA / "reviews" / "requests"
 DECISIONS = BA / "reviews" / "decisions"
+SRS = BA / "srs"                                  # generated publication, `tools/ba publish` (D-61)
 LOCK = BA / ".ba.lock"
 
 
@@ -31,3 +33,6 @@ def rel(p: Path) -> str:
 def show(rel_path: str) -> str:
     """Path as the user sees it from the workspace root."""
     return "ba-ai/" + rel_path
+
+
+BACKLOG_REL = "agile-project/backlog.yaml"

@@ -35,7 +35,7 @@ The orchestrator has run `tools/ba coding authorize <UC>`. It succeeds only when
 
 ## Rules (all BA agents)
 
-1. Start with the context package `ba-ai/workflow/context/<UC>.yaml`. Its `delivery` section lists the repositories, **the use case's worktree paths**, the branch convention, the test files and the defects. Read the approved spec, API design, prototype, architecture, coding rules and security rules it points to.
+1. Start with the context package `ba-ai/workflow/context/<UC>.yaml`. Its `delivery` section lists the repositories, **the use case's worktree paths**, the branch convention, the test files and the defects. Read the approved spec (and its behaviour: activities flow, step rules, the common use cases it follows), API design, prototype, the message and email-template catalogs, the Other Requirements, architecture, coding rules and security rules it points to. Every user-facing text comes from the catalogs: never write your own wording.
 2. **Work only in the use case's worktree** (`<repo>-worktrees/<UC>/`), never in the main checkout. Other use cases are being built in parallel in their own worktrees.
 3. **Never rewrite unrelated modules** (master §24). Modify the minimum necessary files. Follow the project's conventions.
 4. Every change traces to the use case or an acceptance criterion. Commit messages start with the ID: `UC-007: …`, `UC-007-AC-03: …`, `fix(UC-007-DEF-01): …`.

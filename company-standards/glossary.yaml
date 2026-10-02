@@ -1,0 +1,25 @@
+# Company default glossary entries: the SRS template's abbreviations and notation (addendum D-54, D-55).
+# The elicitation agent adds them, then the product's own terms, with
+#   tools/ba catalog add glossary --file company-standards/glossary.yaml
+items:
+  - {term: SRS, kind: ABBREVIATION, definition: System Requirement Specification}
+  - {term: UC, kind: ABBREVIATION, definition: "Use case: one function an actor performs in the system (UC-NNN)"}
+  - {term: BR, kind: ABBREVIATION, definition: "Business rule. BR-NNN is a policy or common rule shared by use cases; UC-NNN-BR-nn is a step rule of one use case"}
+  - {term: CBR, kind: ABBREVIATION, definition: "Common business rule: a business rule of kind COMMON, applied by reference in several use cases"}
+  - {term: CMUC, kind: ABBREVIATION, definition: "Common use case: a reusable specification of one standard operation (view list, create, read, update, delete, disable)"}
+  - {term: ET, kind: ABBREVIATION, definition: Email template (ET-NNN)}
+  - {term: EMSG, kind: ABBREVIATION, definition: Error message shown in a dialog}
+  - {term: IEM, kind: ABBREVIATION, definition: In-line error message shown under a field}
+  - {term: CFD, kind: ABBREVIATION, definition: Confirmation dialog message}
+  - {term: SCD, kind: ABBREVIATION, definition: Success dialog message}
+  - {term: INF, kind: ABBREVIATION, definition: Informing or warning message}
+  - {term: NFR, kind: ABBREVIATION, definition: Non-functional requirement}
+  - {term: US, kind: ABBREVIATION, definition: User story (US-NNN)}
+  - {term: N/A, kind: ABBREVIATION, definition: Not applicable or not available}
+  - {term: "[Field]", kind: NOTATION, definition: "A field or attribute, e.g. [Start date]"}
+  - {term: "{Object}", kind: NOTATION, definition: "A record of an object, e.g. {Leave Request}"}
+  - {term: "\"Value\"", kind: NOTATION, definition: "A literal value, e.g. \"Pending approval\""}
+  - {term: "<Value>", kind: NOTATION, definition: "A special value the system supplies, e.g. <Today>, <Current User>"}
+  - {term: "<<Field>>", kind: NOTATION, definition: "The value of a field filled into an email template, e.g. <<Employee Name>>"}
+  - {term: "(n)", kind: NOTATION, definition: "Step n of an activities flow; step rules are keyed by it"}
+  - {term: "O / O* / O** / X", kind: NOTATION, definition: "Permission matrix: allowed / allowed on the items the user owns / allowed within the scope the function states / not allowed"}

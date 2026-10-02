@@ -1,4 +1,5 @@
-"""Readable Markdown views of the overview and requirements catalogs, generated next to each YAML file.
+"""Readable Markdown views of the BA catalogs, generated next to each YAML file, plus the company views
+(ORD, state transition, use case diagram, permission matrix, object, screen and epic pages — srs.py, D-59).
 
 The YAML stays the source of truth. A view has no frontmatter, so it is not an artifact:
 it is never validated, hashed or put under a gate. `tools/ba sync` regenerates it.
@@ -10,31 +11,39 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from . import paths, schema, store
+from . import paths, schema, srs, store
 from .ids import as_list
 from .workspace import Workspace
 
-VIEW_PREFIXES = ("overview/", "requirements/")     # catalogs under these folders get a view
+# Catalogs under these folders get a view (the company SRS folders, D-45)
+VIEW_PREFIXES = ("input-management/", "high-level-requirements/", "functional-requirements/", "agile-project/",
+                 "appendices/")
 SUFFIX = ".view.md"
-BACKLOG_VIEW = "planning/backlog" + SUFFIX
+BACKLOG_VIEW = "agile-project/backlog" + SUFFIX
+# Folders of one-page-per-item views; a page whose item is gone is removed
+PER_ITEM_VIEW_DIRS = ("functional-requirements/objects/", "functional-requirements/mockup-screens/screens/",
+                      "agile-project/epics/")
 ID_RE = re.compile(r"^[A-Z]+-\d{3,4}$")
 COMPACT_MAX = 24                   # longer list entries are shown as bullets
 HEADING_MAX = 80                   # longer names go under the heading instead of in it
 
 # Summary table columns per catalog: (header, field). Fields not listed go to the item's detail section.
 SUMMARY: Dict[str, List[Tuple[str, str]]] = {
-    "requirements": [("Name", "name"), ("Priority", "priority"), ("Description", "description"), ("Source", "source")],
+    "requirements": [("Name", "name"), ("Type", "type"), ("Category", "category"), ("Priority", "priority"),
+                     ("Description", "description"), ("Source", "source")],
     "open-questions": [("Question", "question"), ("Priority", "priority"), ("Status", "status"),
                        ("Stakeholder", "target_stakeholder")],
     "assumptions": [("Statement", "statement"), ("Status", "status"), ("Reason", "reason")],
-    "actors": [("Name", "name"), ("Type", "type"), ("Description", "description")],
+    "actors": [("Name", "name"), ("Type", "type"), ("Description", "description"), ("Recognised when", "role_mapping")],
     "applications": [("Name", "name"), ("Type", "type"), ("Actors", "actors"), ("Description", "description")],
     "business-processes": [("Name", "name"), ("Trigger", "trigger"), ("Actors", "actors")],
-    "business-rules": [("Name", "name"), ("Rule", "description"), ("Source", "source")],
+    "business-rules": [("Name", "name"), ("Kind", "kind"), ("Rule", "description"), ("Source", "source")],
     "entities": [("Name", "name"), ("Owner", "owner"), ("Description", "description")],
     "integrations": [("Name", "name"), ("Direction", "direction"), ("Owner", "owner"), ("Purpose", "purpose")],
-    "use-cases": [("Name", "name"), ("Actor", "actor"), ("Process", "business_process"),
-                  ("Complexity", "complexity"), ("Risk", "risk_level"), ("Risk flags", "risk_flags")],
+    "use-cases": [("Name", "name"), ("Objective", "objective"), ("Actor", "actor"), ("Object", "object"),
+                  ("Process", "business_process"), ("Complexity", "complexity"), ("Risk", "risk_level"),
+                  ("Risk flags", "risk_flags")],
+    "screens": [("Name", "name"), ("Application", "application"), ("Route", "route"), ("Use cases", "use_cases")],
 }
 DEFAULT_SUMMARY = [("Name", "name")]
 HIDDEN = ("id", "baseline")
@@ -287,15 +296,25 @@ def _render_backlog(ws: Workspace, views: Dict[str, str]) -> str:
 
 
 def write_all(ws: Workspace) -> List[str]:
-    """(Re)write every catalog view and the backlog view. Returns the views that changed, relative to ba-ai/."""
+    """(Re)write every catalog view, the backlog view and the company views. Returns the views that changed,
+    relative to ba-ai/."""
     views = {c: rel for c, rel in viewed_catalogs().items() if c in ws.catalog_data}
-    texts = {rel: _Renderer(ws, cname, views).render() for cname, rel in views.items()}
+    special = srs.catalog_views(ws)
+    texts = {rel: (special[cname]() if cname in special else _Renderer(ws, cname, views).render())
+             for cname, rel in views.items()}
     if paths.BACKLOG.exists():
         texts[BACKLOG_VIEW] = _render_backlog(ws, views)
+    texts.update(srs.derived_views(ws))
     changed = []
     for rel, text in texts.items():
         p = paths.BA / rel
         if not p.exists() or p.read_text(encoding="utf-8") != text:
             store.write_atomic(p, text)
             changed.append(rel)
+    for d in PER_ITEM_VIEW_DIRS:
+        folder = paths.BA / d
+        for f in folder.glob("*" + SUFFIX) if folder.is_dir() else []:
+            if d + f.name not in texts:
+                f.unlink()
+                changed.append(d + f.name)
     return changed

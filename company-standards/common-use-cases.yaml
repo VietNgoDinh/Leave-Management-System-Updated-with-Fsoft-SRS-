@@ -1,0 +1,169 @@
+# Company default Common Use Cases (CMUC), from the SRS template's CMUC 1–5, plus Disable.
+#
+# A "Manage X" use case follows the CMUCs it needs (`follows: [CMUC-…]` on the use case) and its behaviour
+# document specifies only what differs: object-specific step rules, messages and screens (addendum D-50).
+#
+# The overview agent adds the ones the product needs, adapted, with
+#   tools/ba catalog add common-use-cases --file company-standards/common-use-cases.yaml
+# (or one item at a time with --data). The tool allocates CMUC-NNN and numbers each step rule <CMUC>-BR-01, -02, …
+#
+# Before adding, replace every [[message: …]] with the code of that message in ba-ai/appendices/messages.yaml
+# and every [[rule: …]] with the BR ID of that common business rule. Validation rejects a placeholder left in.
+items:
+  - name: View list of Items
+    operation: VIEW_LIST
+    objective: view the list of items of an object
+    actor: The actors of the use case that follows this common use case.
+    trigger: User selects to view the list of items.
+    pre_condition: User signed in successfully as an actor of the use case.
+    post_condition: The list of items is displayed.
+    activities_flow:
+      - "(1) User selects to view the list of items."
+      - "(2) System displays the listing screen with the items."
+    step_rules:
+      - step: "(2)"
+        type: SCREEN_DISPLAYING
+        title: Screen Displaying Rules
+        description: |-
+          The system loads the use case's listing screen.
+          The items shown follow the screen's Data Source, in its Default Sorting, with the list behaviour of other-requirements/list-behaviour.md.
+
+  - name: Create Item
+    operation: CREATE
+    objective: create a new item of an object
+    actor: The actors of the use case that follows this common use case.
+    trigger: User clicks the button to create an item.
+    pre_condition: User signed in successfully as an actor of the use case.
+    post_condition: A new item is created.
+    activities_flow:
+      - "(1) User clicks the button to create an item."
+      - "(2) System displays the form screen in create mode."
+      - "(3) User enters the data and clicks \"Save\"."
+      - "(4) System validates the data."
+      - "(4.1) The data is not valid: system shows the errors; back to (3)."
+      - "(4.2) The data is valid: system creates the item and returns to the previous screen."
+    step_rules:
+      - step: "(2)"
+        type: SCREEN_DISPLAYING
+        title: Screen Displaying Rules
+        description: |-
+          The system loads the use case's form screen in create mode.
+          Each field shows the Default Value of the screen's component table.
+      - step: "(4), (4.1)"
+        type: VALIDATING
+        title: Validating Rules
+        description: |-
+          After the user clicks "Save", the system validates every field as stated in the screen description.
+          If a mandatory field is blank, the system shows [[message: Please input in this field.]] under that field.
+          Otherwise, go to step (4.2).
+      - step: "(4.2)"
+        type: PROCESSING
+        title: Creating Rules
+        description: |-
+          After the validation passes, the system creates the item:
+          - saves all entered data;
+          - logs the audit trail as [[rule: Logging basic audit trail]];
+          - returns the user to the previous screen.
+
+  - name: Read Item
+    operation: READ
+    objective: view the details of a selected item
+    actor: The actors of the use case that follows this common use case.
+    trigger: User selects to open an existing item.
+    pre_condition: User signed in successfully as an actor of the use case.
+    post_condition: The selected item is displayed for viewing.
+    activities_flow:
+      - "(1) User selects to open an existing item."
+      - "(2) System displays the item in view mode."
+    step_rules:
+      - step: "(2)"
+        type: SCREEN_DISPLAYING
+        title: Screen Displaying Rules
+        description: |-
+          The system loads the use case's details screen in view mode for {Selected Item}.
+
+  - name: Update Item
+    operation: UPDATE
+    objective: update an existing item
+    actor: The actors of the use case that follows this common use case.
+    trigger: User selects to edit an existing item, then selects to save.
+    pre_condition: User signed in successfully as an actor of the use case.
+    post_condition: The item is updated.
+    activities_flow:
+      - "(1) User selects to edit an existing item."
+      - "(2) System displays the form screen in edit mode with the saved values."
+      - "(3) User changes the data and clicks \"Save\"."
+      - "(4) System validates the data."
+      - "(4.1) The data is not valid: system shows the errors; back to (3)."
+      - "(4.2) The data is valid: system updates the item and returns to the previous screen."
+    step_rules:
+      - step: "(2)"
+        type: SCREEN_DISPLAYING
+        title: Screen Displaying Rules
+        description: |-
+          The system loads the use case's form screen in edit mode for {Selected Item}, filled with its saved values.
+      - step: "(4), (4.1)"
+        type: VALIDATING
+        title: Validating Rules
+        description: |-
+          After the user clicks "Save", the system validates every field as stated in the screen description.
+          If a mandatory field is blank, the system shows [[message: Please input in this field.]] under that field.
+          Otherwise, go to step (4.2).
+      - step: "(4.2)"
+        type: PROCESSING
+        title: Updating Rules
+        description: |-
+          After the validation passes, the system updates the item:
+          - saves all changed data;
+          - logs the audit trail as [[rule: Logging basic audit trail]];
+          - returns the user to the previous screen.
+
+  - name: Delete Item
+    operation: DELETE
+    objective: delete an existing item
+    actor: The actors of the use case that follows this common use case.
+    trigger: User selects to delete an existing item.
+    pre_condition: User signed in successfully as an actor of the use case.
+    post_condition: The selected item is deleted.
+    activities_flow:
+      - "(1) User selects to delete an existing item."
+      - "(2) System asks for confirmation."
+      - "(3) User confirms or cancels."
+      - "(4) System deletes the item, or does nothing when the user cancelled."
+    step_rules:
+      - step: "(2)"
+        type: CONFIRMATION
+        title: Confirmation Message Displaying Rules
+        description: |-
+          The system shows [[message: Are you sure you want to delete this item?]] with the buttons "OK" and "Cancel".
+      - step: "(4)"
+        type: PROCESSING
+        title: Deleting Rules
+        description: |-
+          If the user clicks "OK", the system deletes the item the way the use case states: moves it to the recycle bin, flags it as deleted, or deletes it permanently.
+          If the user clicks "Cancel", the system closes the dialog and changes nothing.
+
+  - name: Disable Item
+    operation: DISABLE
+    objective: disable an active item so that it can no longer be used
+    actor: The actors of the use case that follows this common use case.
+    trigger: User clicks "Disable" on an active item.
+    pre_condition: User signed in successfully as an actor of the use case. [Status] of the item is "Active".
+    post_condition: The selected item is disabled.
+    activities_flow:
+      - "(1) User clicks \"Disable\" on an active item."
+      - "(2) System asks for confirmation."
+      - "(3) User confirms or cancels."
+      - "(4) System disables the item, or does nothing when the user cancelled."
+    step_rules:
+      - step: "(2)"
+        type: CONFIRMATION
+        title: Confirmation Message Displaying Rules
+        description: |-
+          The system shows [[message: Are you sure you want to disable this item?]] with the buttons "Yes" and "No".
+      - step: "(4)"
+        type: PROCESSING
+        title: Disabling Rules
+        description: |-
+          If the user clicks "Yes", the system updates [Status] of the item to "Inactive", logs the audit trail as [[rule: Logging basic audit trail]], and reloads the listing screen.
+          If the user clicks "No", the system closes the dialog and changes nothing.

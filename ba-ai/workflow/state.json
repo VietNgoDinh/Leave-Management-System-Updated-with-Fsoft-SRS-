@@ -9,22 +9,22 @@
     {
       "run_id": "RUN-001",
       "workflow_type": "MODE_B",
-      "status": "WAITING_FOR_HUMAN",
-      "current_phase": "SPECIFICATION",
-      "current_step": "PER_USE_CASE",
+      "status": "NOT_STARTED",
+      "current_phase": "ELICITATION",
+      "current_step": "ELICITATION",
       "scope": {
         "epic": null,
         "use_cases": []
       },
-      "last_completed_step": "INFORMATION_ARCHITECTURE",
-      "next_step": "human review: UC-001 GATE-04, UC-002 GATE-03, UC-004 GATE-03, UC-007 GATE-03",
+      "last_completed_step": "BOOTSTRAP",
+      "next_step": "add stakeholder material to ba-ai/input-management/user-requirements/, then /ba-next",
       "blocked_reason": null,
       "manual_block": false,
       "origin_cr": null,
       "created_at": "2026-09-30T00:00:00Z",
-      "updated_at": "2026-09-30T09:59:29Z"
+      "updated_at": "2026-10-02T08:29:03Z"
     }
   ],
   "coding_authorization": null,
-  "updated_at": "2026-09-30T09:59:29Z"
+  "updated_at": "2026-10-02T08:29:03Z"
 }

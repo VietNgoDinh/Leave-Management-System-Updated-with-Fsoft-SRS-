@@ -1,15 +1,16 @@
 """Phase 4 — write the delivery backlog from a plan (master spec §11).
 
-The planning agent proposes epics, their use cases, priorities, dependencies and readiness in a plan
-file; `tools/ba backlog plan --file <plan>` merges it into planning/backlog.yaml. Derived fields
-(stage statuses, current_step, artifact links) are kept, and use cases whose work has started keep
-their status, so a re-plan never loses progress.
+The planning agent proposes epics, their use cases, priorities, dependencies, readiness and user stories
+(D-60) in a plan file; `tools/ba backlog plan --file <plan>` merges it into agile-project/backlog.yaml and
+the user-story catalog. Derived fields (stage statuses, current_step, artifact links) are kept, and use
+cases whose work has started keep their status, so a re-plan never loses progress. Stories keep their IDs:
+a story given with its `id` is updated, one without is created, and stories the plan doesn't mention stay.
 """
 from __future__ import annotations
 
 from typing import Dict, List
 
-from . import ids, paths, store
+from . import ids, paths, schema, store
 from .ids import as_list, normalize_id
 from .store import BAError
 
@@ -69,7 +70,15 @@ def apply_plan(plan: dict) -> dict:
                 uc = normalize_id(str((u or {}).get("use_case_id", "")))
                 u["use_case_id"] = uc
                 if ws.catalog_of(uc) != "use-cases":
-                    errors.append(f"{uc} is not in overview/use-cases.yaml")
+                    errors.append(f"{uc} is not in {schema.catalogs()['use-cases']['path']}")
+                for st in as_list(u.get("stories")):
+                    if not isinstance(st, dict) or not st.get("name") or not st.get("story"):
+                        errors.append(f"{uc}: every story needs a 'name' and a 'story' "
+                                      f"(\"As a <actor>, I want …, so that …\") ({st!r:.60})")
+                    elif st.get("id"):
+                        sid = normalize_id(st["id"])
+                        if (ws.item(sid) or {}).get("use_case") != uc:
+                            errors.append(f"{uc}: story {sid} is not one of its user stories — omit 'id' for a new one")
                 if uc in seen_uc:
                     errors.append(f"{uc} is planned twice ({seen_uc[uc]} and {e.get('epic_id') or e['name']})")
                 seen_uc[uc] = e.get("epic_id") or e["name"]
@@ -128,4 +137,14 @@ def apply_plan(plan: dict) -> dict:
                                             "priority, status (BACKLOG/READY/BLOCKED) and dependencies."})
         backlog["epics"] = epics_out
         store.save_yaml(paths.BACKLOG, backlog)
-    return {"epics": [e["epic_id"] for e in epics_out], "use_cases": len(deps), "dropped": dropped}
+        created, updated = [], []
+        for e in plan["epics"]:
+            for u in as_list(e.get("use_cases")):
+                for st in as_list(u.get("stories")):
+                    data = {k: st[k] for k in ("name", "story", "acceptance_criteria") if st.get(k)}
+                    if st.get("id"):
+                        updated.append(ids.catalog_update(st["id"], data))
+                    else:
+                        created.append(ids.catalog_add("user-stories", {**data, "use_case": u["use_case_id"]}))
+    return {"epics": [e["epic_id"] for e in epics_out], "use_cases": len(deps), "dropped": dropped,
+            "stories_created": created, "stories_updated": updated}

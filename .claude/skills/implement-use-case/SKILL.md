@@ -8,7 +8,7 @@ user-invocable: false
 
 | | |
 |---|---|
-| Input | Approved `specifications/use-cases/<UC>.md`, `technical/api/<UC>.md`, `technical/sequence/<UC>.md`, prototype `ui/prototypes/<UC>/`, the acceptance tests (`qa/test-cases/<UC>.md`, its `test_files`), `technical/architecture/architecture.md`, coding rules, security rules, the existing code; context package `delivery` section |
+| Input | Approved `functional-requirements/use-case-specifications/<UC>/spec.md` (and its `behaviour.md`), `technical/api/<UC>.md`, `technical/sequence/<UC>.md`, prototype `functional-requirements/mockup-screens/prototypes/<UC>/`, the message and email-template catalogs (`appendices/`), the Other Requirements (`other-requirements/`), the acceptance tests (`qa/test-cases/<UC>.md`, its `test_files`), `technical/architecture/architecture.md`, coding rules, security rules, the existing code; context package `delivery` section |
 | Output | Code and unit tests on branch `ba/<UC>-<slug>`, in the use case's worktrees; `ba-ai/technical/implementation/<UC>.md` |
 | Consumers | QA test execution (8.2), then the developer at GATE-10 (code review), the user guide (9), the graph (`CodeRef IMPLEMENTS UseCase`) |
 
@@ -21,7 +21,9 @@ user-invocable: false
 3. **Plan.** List the modules and files to change and why, mapped to the spec's flows and APIs. Note every place the work **crosses a service boundary**.
 4. **Implement** the minimum necessary:
    - the APIs exactly as designed (paths, payloads, status codes, error body);
-   - the validations exactly as the VR rules;
+   - the behaviour exactly as the step rules (`<UC>-BR-nn`) and the common use cases it follows;
+   - every message with its catalog text and type, shown as the message configuration says (`appendices/messages.yaml`, `other-requirements/message-configuration.md`); every email from its template (`appendices/email-templates.yaml`), with each placeholder filled from its stated source. Never write your own wording;
+   - the permissions of the permission matrix, enforced as the security rules say;
    - the screens as in the approved prototype, with its labels (the UI tests find elements by role and label);
    - the conventions in the coding rules.
    Never rewrite unrelated modules.

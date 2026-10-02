@@ -8,7 +8,8 @@ from typing import List, Optional
 
 import yaml
 
-from . import coding, compile as spec_compile, context, gates, graph, hooks, ids, paths, planning, prereview, schema, store
+from . import (coding, compile as spec_compile, context, gates, graph, hooks, ids, migrate, paths, planning,
+               prereview, schema, srs, store)
 from .engine import GateCache, derive_run, derive_uc
 from .ids import as_list, normalize_id
 from .store import BAError
@@ -36,7 +37,7 @@ def _scope_ucs(ws: Workspace, scope: Optional[str], run: Optional[dict]) -> Opti
     raise BAError(f"{scope} is neither an epic in the backlog nor a use case")
 
 
-def _parse_data(args) -> dict:
+def _parse_data(args, allow_list: bool = False):
     if getattr(args, "file", None):
         data = store.load_yaml(store.resolve_user_path(args.file))
     elif getattr(args, "data", None):
@@ -46,8 +47,14 @@ def _parse_data(args) -> dict:
             raise BAError(f"--data is not valid JSON/YAML: {e}")
     else:
         raise BAError("give --data '<json or yaml>' or --file <path>")
+    if allow_list and isinstance(data, dict) and isinstance(data.get("items"), list) and len(data) == 1:
+        data = data["items"]
+    if allow_list and isinstance(data, list):
+        if not all(isinstance(x, dict) for x in data):
+            raise BAError("every item of the list must be an object/mapping")
+        return data
     if not isinstance(data, dict):
-        raise BAError("the data must be an object/mapping")
+        raise BAError("the data must be an object/mapping" + (" or a list of them" if allow_list else ""))
     return data
 
 
@@ -366,7 +373,11 @@ def cmd_find(args) -> int:
 
 def cmd_catalog(args) -> int:
     if args.action == "add":
-        print(ids.catalog_add(args.catalog, _parse_data(args), args.force_gated))
+        data = _parse_data(args, allow_list=True)
+        if isinstance(data, list):
+            print("\n".join(ids.catalog_add_many(args.catalog, data, args.force_gated)))
+        else:
+            print(ids.catalog_add(args.catalog, data, args.force_gated))
     elif args.action == "update":
         print(ids.catalog_update(args.id, _parse_data(args), args.force_gated))
     elif args.action == "init":
@@ -406,8 +417,40 @@ def cmd_state(args) -> int:
 def cmd_backlog(args) -> int:
     res = planning.apply_plan(_parse_data(args))
     print(f"backlog planned: {len(res['epics'])} epics ({', '.join(res['epics'])}), {res['use_cases']} use cases"
-          + (f"; removed from the backlog: {', '.join(res['dropped'])}" if res["dropped"] else ""))
+          + (f"; removed from the backlog: {', '.join(res['dropped'])}" if res["dropped"] else "")
+          + (f"; user stories created: {', '.join(res['stories_created'])}" if res.get("stories_created") else "")
+          + (f"; updated: {', '.join(res['stories_updated'])}" if res.get("stories_updated") else ""))
     run_sync()
+    return 0
+
+
+def cmd_publish(args) -> int:
+    """D-61: the SRS in the company structure. Markdown always; Word on request (the docx skill)."""
+    run_sync()
+    files = srs.publish(Workspace())
+    print(f"published {len(files)} pages to ba-ai/srs/ — the whole specification is ba-ai/srs/SRS.md")
+    for f in files:
+        print(f"  ba-ai/{f}")
+    return 0
+
+
+def cmd_migrate(args) -> int:
+    """D-63: move a workspace to the company SRS layout (one time)."""
+    rep = migrate.migrate(dry_run=args.dry_run)
+    for key, title in (("moved", "moved" if not args.dry_run else "would move"), ("rewritten", "paths rewritten in"),
+                       ("removed", "removed"), ("conflicts", "NOT DONE")):
+        if rep[key]:
+            print(f"{title}:")
+            for x in rep[key]:
+                print(f"  {x}")
+    if not any(rep.values()):
+        print("nothing to migrate: the workspace already uses the company layout")
+    if rep["conflicts"]:
+        return 1
+    if not args.dry_run:
+        run_sync()
+        print("synced. Gate approvals given under the old paths no longer hold (addendum D-63): "
+              "run /ba-next to regenerate what changed, then review the gates again.")
     return 0
 
 
@@ -610,6 +653,13 @@ def build_parser() -> argparse.ArgumentParser:
     r.add_argument("subject")
     r.add_argument("--note", required=True)
     s.set_defaults(func=cmd_prereview)
+
+    s = sub.add_parser("publish", help="write the SRS in the company structure to ba-ai/srs/ (D-61)")
+    s.set_defaults(func=cmd_publish)
+
+    s = sub.add_parser("migrate", help="move the workspace to the company SRS layout (one time, D-63)")
+    s.add_argument("--dry-run", action="store_true", help="only list what would move")
+    s.set_defaults(func=cmd_migrate)
 
     s = sub.add_parser("hook", help="Claude Code hook entry points")
     s.add_argument("event", choices=["user-prompt", "pre-tool-use"])

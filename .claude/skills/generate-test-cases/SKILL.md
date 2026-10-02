@@ -8,7 +8,7 @@ user-invocable: false
 
 | | |
 |---|---|
-| Input | `specifications/analysis/<UC>-acceptance.md`, `<UC>-activity.md` (VR/AF/EF), `specifications/use-cases/<UC>.md`, `technical/api/<UC>.md`, the prototype, the entities' lifecycles, *Testing Conventions* |
+| Input | `functional-requirements/use-case-specifications/<UC>/acceptance.md`, `behaviour.md` (activities flow, step rules, AF/EF, emails) and `spec.md`; `technical/api/<UC>.md`; the prototype; the message and email-template catalogs; the use case's permissions; the objects' lifecycles; *Testing Conventions* |
 | Output | `ba-ai/qa/test-cases/<UC>.md` (TC-NNN); executable acceptance tests committed in the use case's worktree |
 | Consumers | The coding agent (7, makes them pass and may not edit them), test execution (8.2), GATE-07, the graph (`TestCase VERIFIES AcceptanceCriterion`, `CodeRef TESTS UseCase`) |
 
@@ -22,15 +22,16 @@ Why first: the tests then come from the approved spec, not from the code. The co
 2. **IDs**: each test case gets a global ID from `tools/ba next-id TC`. Never number them yourself; the validator rejects IDs that were never allocated. On revisions, keep the existing IDs.
 3. **Coverage** (master §25), at least:
    - every acceptance criterion, verified by one or more TCs (the validator enforces this);
-   - every VR (validation), AF (alternate flow) and EF (error flow);
+   - every step rule (`<UC>-BR-nn`: each Validating rule's conditions and messages, each Processing rule's result and state change), AF (alternate flow) and EF (error flow);
+   - every message the use case shows (by code and exact catalog text) and every email it sends (ET: recipients, subject, placeholders filled);
    - every business rule, including a boundary case for each numeric or date rule;
    - each API: success, validation error, authorization denial;
-   - permission: every actor that must *not* do this;
+   - permission: every actor with X in the permission matrix is refused, and every O* / O** stays within its scope;
    - every state transition the use case causes, and the forbidden ones from the entity's lifecycle.
 4. **Category**, one per test case: Functional, Validation, API, Integration, Regression, Permission, State Transition, Negative or Boundary.
 5. **Write the executable tests now, against the approved contract**, since there is no code yet:
    - **API tests** use the exact paths, payloads, status codes and error bodies from `technical/api/<UC>.md`.
-   - **UI tests (Playwright, D-34)** locate elements by role and accessible name, with the labels and messages from the approved UI and prototype: `getByRole('button', { name: 'Submit request' })`, `getByText('<exact message>')`. Never use CSS selectors or test IDs that don't exist yet.
+   - **UI tests (Playwright, D-34)** locate elements by role and accessible name, with the component labels and the catalog's message texts from the approved screens and prototype: `getByRole('button', { name: 'Submit request' })`, `getByText('<exact message text>')`. Never use CSS selectors or test IDs that don't exist yet. A system use case has no UI tests: test its trigger (call the job) and its effects.
    - Name each test `TC-012 <title>`. Mark a test `manual` in the document only when automation can't observe the result. Manual critical journeys go to GATE-07.
    - They fail now. That is expected. Make sure each one fails for the right reason (missing endpoint or screen), not for a broken test.
    - Commit in the worktree: `TC-012..TC-020: acceptance tests for <UC>`.
@@ -67,7 +68,7 @@ updated_at: ""
 - **Preconditions:** …
 - **Steps:** 1. … 2. …
 - **Expected:** <observable result: status, message text, data change, HTTP code>
-- **Covers:** BR-001, <UC>-VR-02
+- **Covers:** BR-001, <UC>-BR-02
 
 ## Coverage
 | Item | Test cases |
@@ -78,6 +79,6 @@ updated_at: ""
 
 ## Checklist
 
-- [ ] Every AC, VR, AF, EF and BR appears in Coverage with at least one TC.
+- [ ] Every AC, step rule, AF, EF, BR, message and email appears in Coverage with at least one TC.
 - [ ] Every expected result comes from the approved spec; UI tests use roles and labels from the approved UI.
 - [ ] `test_files` and `tests_commit` are filled in; TC IDs came from `tools/ba next-id TC`.

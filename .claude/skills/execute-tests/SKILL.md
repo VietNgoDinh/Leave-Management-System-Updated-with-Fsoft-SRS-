@@ -18,7 +18,7 @@ user-invocable: false
    - **Check that the acceptance tests are untouched (D-38):** `git -C <worktree> diff --stat <tests_commit> -- <files in test_files>`.
    - If the implementation changed them, restore them (`git -C <worktree> checkout <tests_commit> -- <file>`) and record a CODE_DEFECT "implementation edited acceptance test <file>". Then run.
 2. **Run** every automated test case: unit, API, integration, and UI with Playwright from the frontend repository (`npx playwright test …`, D-34). Record per TC: PASSED, FAILED, NOT_RUN (manual) or BLOCKED.
-3. **Compare (8.3)**: for every failure, write *Expected* (from the spec, citing AC, VR or BR) vs *Actual* (observed, with evidence such as the log line, response or screenshot path), and classify it:
+3. **Compare (8.3)**: for every failure, write *Expected* (from the spec, citing the AC, step rule or BR, and the message code) vs *Actual* (observed, with evidence such as the log line, response or screenshot path), and classify it:
 
    | Classification | When |
    |---|---|

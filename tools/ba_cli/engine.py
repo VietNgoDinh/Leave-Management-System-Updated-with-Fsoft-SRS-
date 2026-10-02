@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Callable, Dict, List, Optional
 
-from . import coding, gates, prereview, schema
+from . import coding, gates, paths, prereview, schema
 from .ids import as_list
 from .workspace import Workspace
 
@@ -52,6 +52,9 @@ def _action(ws, uc, st, action, group, **kw) -> dict:
 
 
 def gate_required(ws: Workspace, uc: str, gid: str) -> bool:
+    """D-23: GATE-07 for risky use cases only. D-57: no UI gates for a system use case without screens."""
+    if gid in schema.ui_gates() and not ws.ui_required(uc):
+        return False
     return schema.gate_required(gid, ws.item(uc))
 
 
@@ -163,7 +166,7 @@ def derive_uc(ws: Workspace, uc: str, run: Optional[dict], gs: Callable, errs: D
     base = {"uc": uc, "name": ws.label(uc)}
     bl = ws.backlog_ucs.get(uc)
     if not bl:
-        return {**base, "state": "BLOCKED", "step": None, "reason": "not in planning/backlog.yaml"}
+        return {**base, "state": "BLOCKED", "step": None, "reason": f"not in {paths.BACKLOG_REL}"}
     item = bl["item"]
     if item.get("status") == "BACKLOG":
         return {**base, "state": "NOT_READY", "step": None,
@@ -183,6 +186,7 @@ def derive_uc(ws: Workspace, uc: str, run: Optional[dict], gs: Callable, errs: D
                     "reason": f"depends on {dep} ({eng['dependency_gate']} is {s})"}
 
     steps = schema.uc_steps()
+    ui = ws.ui_required(uc)
 
     def pending_comments(i: int) -> dict:
         """Reviewer comments still to address on the gate that covers step i."""
@@ -197,6 +201,8 @@ def derive_uc(ws: Workspace, uc: str, run: Optional[dict], gs: Callable, errs: D
         return {}
 
     for i, st in enumerate(steps):
+        if st.get("ui") and not ui:
+            continue                     # D-57: a system use case with no screens has no UI steps
         if st.get("needs_repositories"):
             setup = _setup_action(ws, uc, st, base)
             if setup:
@@ -259,14 +265,14 @@ def _next_gate(route: List[dict], idx: int) -> Optional[str]:
 
 
 def run_step_outputs(ws: Workspace, sid: str) -> List[dict]:
-    """[{path, built_from, app?}] the step must produce right now."""
+    """[{path, built_from, item?}] the step must produce right now (per_item: one per catalog item)."""
     sdef = schema.run_step(sid) or {}
     outs = [dict(o) for o in sdef.get("outputs") or []]
-    pa = sdef.get("per_application")
-    if pa:
-        for app in ws.ia_applications():
-            outs.append({"path": pa["path"].format(APP=app["id"]), "built_from": pa.get("built_from", []),
-                         "app": app["id"]})
+    for pi in sdef.get("per_item") or []:
+        ph = schema.per_item_placeholder(pi["catalog"])
+        for it in ws.per_item_items(pi["catalog"], pi.get("where")):
+            outs.append({"path": pi["path"].replace(ph, it["id"]), "built_from": pi.get("built_from", []),
+                         "item": it["id"], "catalog": pi["catalog"], "per_item": True})
     return outs
 
 
@@ -276,6 +282,12 @@ def blocking_questions(ws: Workspace) -> List[dict]:
 
 def unplanned_use_cases(ws: Workspace) -> List[str]:
     return [u["id"] for u in ws.items_in("use-cases") if u["id"] not in ws.backlog_ucs]
+
+
+def use_cases_without_story(ws: Workspace) -> List[str]:
+    """D-60: every planned use case has at least one user story."""
+    with_story = {s.get("use_case") for s in ws.items_in("user-stories")}
+    return [uc for uc in ws.backlog_ucs if uc not in with_story]
 
 
 def derive_run_step(ws: Workspace, sid: str, errs: Dict[str, list]) -> Optional[dict]:
@@ -299,7 +311,7 @@ def derive_run_step(ws: Workspace, sid: str, errs: Dict[str, list]) -> Optional[
         stale = ws.stale_reasons(doc)
         if stale:
             reasons["REGENERATE"] += [f"ba-ai/{o['path']}: {r}" for r in stale]
-        elif o.get("built_from") and not doc.fm.get("built_from"):
+        elif "built_from" not in doc.fm:
             reasons["FIX"].append(f"ba-ai/{o['path']} is not stamped (tools/ba stamp)")
         if errs.get(o["path"]):
             reasons["FIX"] += [f"ba-ai/{o['path']}: {m}" for m in errs[o["path"]]]
@@ -311,13 +323,17 @@ def derive_run_step(ws: Workspace, sid: str, errs: Dict[str, list]) -> Optional[
             reasons["FIX"] += [f"ba-ai/{cpath}: {m}" for m in errs[cpath]]
     if sdef.get("backlog"):
         if not ws.epics:
-            reasons["GENERATE"].append("planning/backlog.yaml has no epics")
+            reasons["GENERATE"].append(f"{paths.BACKLOG_REL} has no epics")
         else:
             missing = unplanned_use_cases(ws)
             if missing:
                 reasons["REGENERATE"].append("use cases not planned yet: " + ", ".join(missing))
-        if errs.get("planning/backlog.yaml"):
-            reasons["FIX"] += errs["planning/backlog.yaml"]
+            if sdef.get("stories"):
+                no_story = use_cases_without_story(ws)
+                if no_story and ws.items_in("user-stories"):
+                    reasons["REGENERATE"].append("use cases without a user story: " + ", ".join(no_story))
+        if errs.get(paths.BACKLOG_REL):
+            reasons["FIX"] += errs[paths.BACKLOG_REL]
     action = next((a for a in ("GENERATE", "REGENERATE", "FIX") if reasons[a]), None)
     if action:
         all_reasons = reasons["GENERATE"] + reasons["REGENERATE"] + reasons["FIX"]
@@ -332,7 +348,7 @@ def derive_run_step(ws: Workspace, sid: str, errs: Dict[str, list]) -> Optional[
         if qs:
             return {"status": "WAITING_FOR_HUMAN",
                     "next_step": "stakeholder input: answer " + ", ".join(q["id"] for q in qs)
-                                 + " — add meeting notes to ba-ai/requirements/meetings/, then /ba-next",
+                                 + " — add meeting notes to ba-ai/input-management/meeting-minutes/, then /ba-next",
                     "run_action": {"action": "WAIT_FOR_STAKEHOLDERS", "step": sid,
                                    "questions": [{k: q.get(k) for k in ("id", "question", "target_stakeholder",
                                                                          "priority", "reason")} for q in qs]}}

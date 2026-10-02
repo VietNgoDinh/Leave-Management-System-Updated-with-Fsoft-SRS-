@@ -1,6 +1,6 @@
 ---
 name: generate-clarification-questions
-description: BA workflow Phase 2 step 2.4 — clarification questions grouped by stakeholder, each with reason, impact, priority and whether it blocks the overview (ba-ai/requirements/clarification-log/open-questions.yaml). Used by elicitation-agent; not for direct use.
+description: BA workflow Phase 2 step 2.4 — clarification questions grouped by stakeholder, each with reason, impact, priority and whether it blocks the overview (ba-ai/input-management/elicitation/open-questions.yaml). Used by elicitation-agent; not for direct use.
 user-invocable: false
 ---
 
@@ -9,7 +9,7 @@ user-invocable: false
 | | |
 |---|---|
 | Input | Gap analysis and unresolved decisions from step 2.3; existing open questions |
-| Output | Items in `ba-ai/requirements/clarification-log/open-questions.yaml` (Q-NNN) |
+| Output | Items in `ba-ai/input-management/elicitation/open-questions.yaml` (Q-NNN) |
 | Consumers | The BA's stakeholder meetings (step 2.5), the orchestrator's stakeholder wait, overview analysis |
 
 ## Procedure

@@ -6,3 +6,4 @@ __pycache__/
 ba-ai/.ba.lock
 ba-ai/workflow/context/
 ba-ai/**/.tmp-*
+backups/

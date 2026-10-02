@@ -1,6 +1,6 @@
 ---
 name: build-html-prototype
-description: BA Spec Engine step 5.3 — build a clickable, self-contained HTML prototype from the approved functional UI (ba-ai/ui/prototypes/<UC>/). Used by ui-agent; not for direct use.
+description: BA Spec Engine step 5.3 — build a clickable, self-contained HTML prototype from the approved screen design (ba-ai/functional-requirements/mockup-screens/prototypes/<UC>/). It is the company SRS's mockup. Used by ui-agent; not for direct use.
 user-invocable: false
 ---
 
@@ -8,26 +8,27 @@ user-invocable: false
 
 | | |
 |---|---|
-| Input | **Approved** `ba-ai/ui/markdown/<UC>.md` (GATE-03), `ba-ai/ui/design-system.md`, context package |
-| Output | `ba-ai/ui/prototypes/<UC>/index.html` and `ba-ai/ui/prototypes/<UC>/README.md` |
-| Consumers | BA/stakeholder review (GATE-04) → sequence analysis (5.4) |
+| Input | **Approved** `ba-ai/functional-requirements/mockup-screens/<UC>.md` (GATE-03), `ba-ai/technical/design-system.md` (visual), `ba-ai/other-requirements/` (field controls, message configuration, list behaviour), context package |
+| Output | `ba-ai/functional-requirements/mockup-screens/prototypes/<UC>/index.html` and `README.md` |
+| Consumers | BA/stakeholder review (GATE-04) → use case behaviour (5.4); the mockup link of each generated screen page and of the SRS *Mockups Screen* chapter |
 
-The prototype validates requirements. It is not production code.
+The prototype validates requirements, and it serves as the company SRS's mockup of each screen. It is not production code. A system use case with no screens has no prototype (D-57).
 
 ## Rules
 
 - **Self-contained:** one `index.html` with inline CSS and JavaScript. No CDNs, no fetch, no build step; it must work opened straight from disk. Extra files (images) go in the same folder.
-- **Faithful:** the markdown is the specification. Every screen, field, action, state and message in it appears here with the same labels and text. Add nothing the markdown doesn't define; if you find a gap, note it in README → Limitations and raise an open question instead of designing around it.
+- **Faithful:** the screen design is the specification. Every screen, every row of its component table (with its default value, editable and mandatory flags), every state and every message appears here with the same labels and text. Add nothing the design doesn't define; if you find a gap, note it in README → Limitations and raise an open question instead of designing around it.
+- **Company conventions:** controls behave as `other-requirements/field-controls.md` says (placeholder "Please select item", date format, …), messages as `message-configuration.md` says for their type (inline error under the field, confirmation dialog with Yes/No, success dialog closing after 5 s), and lists as `list-behaviour.md` says (pagination, search, column overflow), unless the screen design states otherwise.
 - **Navigable:** hash routes per screen (`#/scr-001`), wrapper `<section data-screen="SCR-001">`. Navigation follows the markdown's Navigation section.
 - **Interactive enough to validate behaviour:**
-  - client-side validation with the exact messages from the markdown, triggered on blur and on submit, plus the error summary pattern from the design system;
+  - client-side validation with the exact messages from the screen design, triggered as the field controls and the screen say;
   - dialogs, confirmation steps and success toasts as described;
   - realistic, clearly fictional in-memory sample data.
 - **Prototype controls panel** (small collapsible panel, bottom-right, labelled "Prototype controls"): force each state the markdown lists (empty, loading, server errors such as a business-rule 409 or a 503 dependency outage) and reset the data. This is how reviewers see non-happy paths.
 - A fixed banner: "Prototype — <UC> <name> — not production code".
-- Put `data-rule="BR-xxx"` on elements that show a rule-driven message, so reviewers can trace behaviour to rules.
+- Put `data-message="IEM-001"` on every element that shows a catalogued message, and `data-rule="BR-xxx"` on elements that show a rule-driven message, so reviewers can trace behaviour to messages and rules.
 - Basic accessibility: every input has a `<label for>`; actions are `<button>`s.
-- Styling uses the design system's colours, components and layout.
+- Styling uses the design system's colours, components and layout. Hash routes per screen use the screen ID in lower case (`#/scr-005`): the generated screen pages link to them.
 
 ## README template
 
@@ -49,7 +50,7 @@ updated_at: ""
 # <UC> — <use case name>: Interactive Prototype
 
 ## How to Open
-Open `ba-ai/ui/prototypes/<UC>/index.html` in a browser (double-click; no server needed).
+Open `ba-ai/functional-requirements/mockup-screens/prototypes/<UC>/index.html` in a browser (double-click; no server needed).
 
 ## Screens Covered
 | Screen | Prototype route | Notes |
@@ -66,5 +67,5 @@ What is simulated or not represented (for example "no real lookup in the externa
 
 ## Finish
 
-1. `tools/ba stamp ba-ai/ui/prototypes/<UC>/` (stamps README.md) and `tools/ba validate ba-ai/ui/prototypes/<UC>/`.
-2. Check the page parses: `python3 -c "import html.parser,sys; html.parser.HTMLParser().feed(open(sys.argv[1]).read())" ba-ai/ui/prototypes/<UC>/index.html`.
+1. `tools/ba stamp ba-ai/functional-requirements/mockup-screens/prototypes/<UC>/` (stamps README.md) and `tools/ba validate ba-ai/functional-requirements/mockup-screens/prototypes/<UC>/`.
+2. Check the page parses: `python3 -c "import html.parser,sys; html.parser.HTMLParser().feed(open(sys.argv[1]).read())" ba-ai/functional-requirements/mockup-screens/prototypes/<UC>/index.html`.

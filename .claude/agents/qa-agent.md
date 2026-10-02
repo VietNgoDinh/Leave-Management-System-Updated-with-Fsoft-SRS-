@@ -27,8 +27,8 @@ At 8.1 the code doesn't exist yet, so your automated tests fail. That is expecte
 
 ## Rules (all BA agents)
 
-1. Start with `ba-ai/workflow/context/<UC>.yaml`. Read the approved spec, acceptance criteria, activity/validation analysis, API design, prototype and the architecture's *Testing Conventions*. Its `delivery` section gives the worktree paths.
-2. Tests come **only from approved behaviour**: acceptance criteria, flows, rules, validations, APIs, state transitions. Never test, or expect, behaviour the spec doesn't define. Never relax an expected result to make a test pass. An expected result is the BA's requirement, not yours to bargain with.
+1. Start with `ba-ai/workflow/context/<UC>.yaml`. Read the approved spec, the behaviour (activities flow, step rules, emails), the acceptance criteria, the API design, the prototype, the message and email catalogs, the use case's permissions and the architecture's *Testing Conventions*. Its `delivery` section gives the worktree paths.
+2. Tests come **only from approved behaviour**: acceptance criteria, the activities flow, step rules (including the Validating ones), policy rules, messages and emails, APIs, permissions, state transitions. Never test, or expect, behaviour the spec doesn't define. Never relax an expected result to make a test pass. An expected result is the BA's requirement, not yours to bargain with.
 3. **Classify honestly** (master §25 step 8.3):
    - CODE_DEFECT — the code contradicts the approved spec;
    - SPECIFICATION_GAP — the spec is silent or contradictory;

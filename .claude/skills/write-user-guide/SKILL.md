@@ -8,7 +8,7 @@ user-invocable: false
 
 | | |
 |---|---|
-| Input | The running application (from the implementation summary's *How to run locally*), the approved spec (flows, messages, permissions), test results, product overview (terminology) |
+| Input | The running application (from the implementation summary's *How to run locally*), the approved spec (flows, messages, permissions), test results, the glossary and the product overview (terminology) |
 | Output | `ba-ai/user-guide/<UC>/guide.md`, `ba-ai/user-guide/<UC>/screenshots/step-NN.png` |
 | Consumers | The BA at GATE-08; the product's users |
 
@@ -17,7 +17,8 @@ user-invocable: false
 1. **Start the application** from the use case's worktrees (`delivery.repositories[].worktree`), on a free port, with test data that shows the normal path. If it won't start, stop and report it. Never use prototype images.
 2. **Walk the main flow** as the actor. For each step, capture a screenshot with Playwright from the frontend worktree (D-34): a small script at `e2e/user-guide/<uc>.spec.ts`, run with `npx playwright test e2e/user-guide/<uc>.spec.ts`, that calls `page.screenshot({ path: '<abs path>/ba-ai/user-guide/<UC>/screenshots/step-01.png' })`. Commit only that script, with `<UC>: user-guide screenshots`.
 3. **Write the guide** for the actor, not for developers: short imperative instructions, using the exact labels the application shows.
-   - *Common Errors*: the validation and error messages the user can meet, from the spec's VR and EF, as the application words them, each with how to fix it.
+   - *Common Errors*: the messages the user can meet (the spec's Messages section, from its Validating step rules and error flows), as the application words them, each with how to fix it.
+   - Use the glossary's terms (`appendices/glossary.yaml`) and the application's exact labels; GATE-08 checks the terminology against the glossary.
    - *Troubleshooting*: what to do when something outside the user's control fails.
 4. Compare with the approved spec while you go. Report any difference; never describe behaviour the application doesn't have.
 5. `tools/ba stamp ba-ai/user-guide/<UC>/guide.md` → `tools/ba validate` (it checks that every image exists).

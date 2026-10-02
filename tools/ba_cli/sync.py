@@ -84,6 +84,8 @@ def _artifact_status(gs: Callable, entries: List[tuple], stale: bool, current: O
 
 def stage_status(ws: Workspace, gs: Callable, uc: str, sdef: dict, r: Optional[dict] = None) -> str:
     """One backlog stage field (ui_status, …, documentation_status), derived from artifacts and gates."""
+    if sdef.get("ui") and not ws.ui_required(uc):
+        return "NOT_APPLICABLE"            # D-57: a system use case with no screens
     types = sdef.get("artifact_types") or []
     gate_ids = [g for g in sdef.get("gates") or [] if gate_required(ws, uc, g)]
     ss = [gs(g, uc)["status"] for g in gate_ids]

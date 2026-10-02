@@ -1,0 +1,13 @@
+# Company default Common Business Rules (the template's "CBR"). In the kit they are business rules of
+# kind COMMON (addendum D-47): procedural rules that several use cases apply by reference.
+#
+# The overview agent adds the ones the product needs, adapted and citing their source, with
+#   tools/ba catalog add business-rules --data '{…}'
+# Step rules then refer to them by their BR ID ("Logs the audit trail as BR-023").
+items:
+  - name: Logging basic audit trail
+    kind: COMMON
+    description: |-
+      When a record is created: update [Created by] to [User ID] of {Current Login User}, and [Created at] to <Current Date Time>.
+      When a record is created or updated: update [Last modified by] to [User ID] of {Current Login User}, and [Last modified at] to <Current Date Time>.
+    source: Company SRS standard CBR1 (company-standards/common-business-rules.yaml)
